@@ -1,0 +1,16 @@
+---vehicle--
+
+GET bodytype:	http://localhost:8000/api/vehicle/bodytype
+GET city:	http://localhost:8000/api/global/city
+GET color:	http://localhost:8000/api/vehicle/color
+GET fueltype:	http://localhost:8000/api/vehicle/fueltype
+
+
+
+
+
+doc_ref = db.collection('carDetails').document('123')  # Use the actual document ID
+
+# Update only the "comfort" field
+new_comfort_data = ["new comfort feature 1", "new comfort feature 2"]
+doc_ref.update({"comfort": new_comfort_data})
