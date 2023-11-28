@@ -18,88 +18,28 @@ const collectionName=require('../models');
 //   });
 
 
-exports.test = (req,res) =>
+exports.login = (req,res) =>
   new Promise(async (resolve, reject) => {
-    try {
-        const snapshot = await db.firestore().collection(collectionName.test).get();
-        const result = snapshot.docs.map(doc => doc.data());
-        resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
-      
-    } catch (error) {
-      reject(error);
-    }
-  });
 
-exports.addUser = (req) =>
-  new Promise(async (resolve, reject) => {
-    try {
-        db.user
-        .findOne({
-          where: {
-            email: {
-              [Op.eq]: req.email
-            }
-          }
-        })
-        .then(async (user) => {
-          if (user) {
-            resolve({ success: false, status: status.Ok, msg: 'User already exist!' });
-          } else {
-            db.user
-                .create({
-                    username: req.username,
-                    email: req.email,
-                    password: req.password,
-                    created_at: new Date().getTime(),
-                    updated_at: new Date().getTime()
-                })
-                .then(async (result) => {
-                    resolve({ success: true, status: status.Ok, msg: `Create successfully!` });
-                })
-                .catch((e) => {
-                    resolve({
-                    success: false,
-                    extra: e,
-                    status: status.BadRequest,
-                    errors: [{ msg: 'Something went wrong. Please try again .' }]
-                    });
-                });
-          }
-        })
-        .catch((e) => {
-          resolve({
-            success: false,
-            extra: e,
-            status: status.BadRequest,
-            errors: [{ msg: 'Something went wrong. Please try again .' }]
-          });
-        });
-        
-      
-    } catch (error) {
-      reject(error);
-    }
-  });
+    const email=req.email;
+    const password=req.password;
+    const collectionRef = db.firestore().collection(collectionName.admin);
 
-exports.loginUser = (req) =>
-  new Promise(async (resolve, reject) => {
     try {
-        db.user
-        .findOne({
-          where: {
-            username: {
-              [Op.eq]: req.username
-            },
-            password: {
-                [Op.eq]: req.password
-              }
-          }
-        })
-        .then(async (user) => {
-          if (user) {
-                await jwtService
-                      .generateAccessToken({
-                        username: req.username,
+          const querySnapshot = await collectionRef
+          .where('email', '==', email)
+          .where('password', '==', password)
+          .get();
+
+        // Check if there are any documents that match the query
+        if (querySnapshot.empty) {
+          resolve({ success: false, status: status.NotFound, msg: 'Invalid Credentials'});
+        }
+        const snapshot = await db.firestore().collection(collectionName.admin).get();
+        const value = snapshot.docs.map(doc => doc.data());
+        console.log(value.data.id);
+        await jwtService.generateAccessToken({
+                        email: req.email,
                         id: user.id
                         // type: 'customer',
                         // name: `${result.fname} ${result.lname}`
@@ -124,81 +64,203 @@ exports.loginUser = (req) =>
                         });
                       });
             resolve({ success: true, status: status.Ok, msg: 'Login Success!' });
-          } else {
-            resolve({ success: false, status: status.BadRequest, msg: 'Invalid Credentials!' });
-          }
-        })
-        .catch((e) => {
-          resolve({
-            success: false,
-            extra: e,
-            status: status.BadRequest,
-            errors: [{ msg: 'Something went wrong. Please try again .' }]
-          });
-        });
-        
+
+        // Process the documents that match the query
+        const result = querySnapshot.docs.map(doc => doc.data());
+        resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
+
+
+      // const userDoc = await admin.firestore().collection('users').doc(uid).get();
+        // const snapshot = await db.firestore().collection(collectionName.admin).get();
+        // const result = snapshot.docs.map(doc => doc.data());
+        // resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
       
     } catch (error) {
       reject(error);
     }
   });
 
-exports.getUser = (req,res) =>
-  new Promise(async (resolve, reject) => {
-    try {
-        const userId= req.auth.id;
-        // console.log(req.auth.id);
-        db.user
-        .findOne({
-          where: {
-            id: {
-              [Op.eq]: userId
-            }
-          }
-        })
-        .then(async (user) => {
-          if (user) {
-                const result = user.dataValues;
-                // console.log(result);
-            resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
-          } else {
-            resolve({ success: false, status: status.BadRequest, msg: 'No data found!' });
-          }
-        })
-        .catch((e) => {
-          resolve({
-            success: false,
-            extra: e,
-            status: status.BadRequest,
-            errors: [{ msg: 'Something went wrong. Please try again .' }]
-          });
-        });
-        // resolve({ success: true, status: status.Ok, msg: 'Success' });
+// exports.test = (req,res) =>
+//   new Promise(async (resolve, reject) => {
+//     try {
+//         const snapshot = await db.firestore().collection(collectionName.test).get();
+//         const result = snapshot.docs.map(doc => doc.data());
+//         resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
       
-    } catch (error) {
-      reject(error);
-    }
-  });
+//     } catch (error) {
+//       reject(error);
+//     }
+//   });
 
-exports.uploadImage = (req,res) =>
-  new Promise(async (resolve, reject) => {
-    try {
+// exports.addUser = (req) =>
+//   new Promise(async (resolve, reject) => {
+//     try {
+//         db.user
+//         .findOne({
+//           where: {
+//             email: {
+//               [Op.eq]: req.email
+//             }
+//           }
+//         })
+//         .then(async (user) => {
+//           if (user) {
+//             resolve({ success: false, status: status.Ok, msg: 'User already exist!' });
+//           } else {
+//             db.user
+//                 .create({
+//                     username: req.username,
+//                     email: req.email,
+//                     password: req.password,
+//                     created_at: new Date().getTime(),
+//                     updated_at: new Date().getTime()
+//                 })
+//                 .then(async (result) => {
+//                     resolve({ success: true, status: status.Ok, msg: `Create successfully!` });
+//                 })
+//                 .catch((e) => {
+//                     resolve({
+//                     success: false,
+//                     extra: e,
+//                     status: status.BadRequest,
+//                     errors: [{ msg: 'Something went wrong. Please try again .' }]
+//                     });
+//                 });
+//           }
+//         })
+//         .catch((e) => {
+//           resolve({
+//             success: false,
+//             extra: e,
+//             status: status.BadRequest,
+//             errors: [{ msg: 'Something went wrong. Please try again .' }]
+//           });
+//         });
         
-      const storage = multer.diskStorage({
-        destination: function (req, file, cb) {
-          return cb(null, '/uploads')
-        },
-        filename: function (req, file, cb) {
-          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-         return  cb(null, file.fieldname + '-' + uniqueSuffix)
-        }
-      })
       
-      const upload = multer({ storage: storage })
-      resolve({ success: true, status: status.Ok, msg: 'success'});
+//     } catch (error) {
+//       reject(error);
+//     }
+//   });
+
+// exports.loginUser = (req) =>
+//   new Promise(async (resolve, reject) => {
+//     try {
+//         db.user
+//         .findOne({
+//           where: {
+//             username: {
+//               [Op.eq]: req.username
+//             },
+//             password: {
+//                 [Op.eq]: req.password
+//               }
+//           }
+//         })
+//         .then(async (user) => {
+//           if (user) {
+//                 await jwtService
+//                       .generateAccessToken({
+//                         username: req.username,
+//                         id: user.id
+//                         // type: 'customer',
+//                         // name: `${result.fname} ${result.lname}`
+//                       })
+//                       .then((token) => {
+//                         if (token.status === 200) {
+//                           resolve({
+//                             success: true,
+//                             status: status.Ok,
+//                             data: { access_token: token.token, userId: user.id }
+//                           });
+//                         } else {
+//                           resolve(token);
+//                         }
+//                       })
+//                       .catch((e) => {
+//                         resolve({
+//                           success: false,
+//                           extra: e,
+//                           status: status.BadRequest,
+//                           errors: [{ msg: 'Something went wrong. Please try again .' }]
+//                         });
+//                       });
+//             resolve({ success: true, status: status.Ok, msg: 'Login Success!' });
+//           } else {
+//             resolve({ success: false, status: status.BadRequest, msg: 'Invalid Credentials!' });
+//           }
+//         })
+//         .catch((e) => {
+//           resolve({
+//             success: false,
+//             extra: e,
+//             status: status.BadRequest,
+//             errors: [{ msg: 'Something went wrong. Please try again .' }]
+//           });
+//         });
+        
       
-    } catch (error) {
-      reject(error);
-    }
-  });
+//     } catch (error) {
+//       reject(error);
+//     }
+//   });
+
+// exports.getUser = (req,res) =>
+//   new Promise(async (resolve, reject) => {
+//     try {
+//         const userId= req.auth.id;
+//         // console.log(req.auth.id);
+//         db.user
+//         .findOne({
+//           where: {
+//             id: {
+//               [Op.eq]: userId
+//             }
+//           }
+//         })
+//         .then(async (user) => {
+//           if (user) {
+//                 const result = user.dataValues;
+//                 // console.log(result);
+//             resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
+//           } else {
+//             resolve({ success: false, status: status.BadRequest, msg: 'No data found!' });
+//           }
+//         })
+//         .catch((e) => {
+//           resolve({
+//             success: false,
+//             extra: e,
+//             status: status.BadRequest,
+//             errors: [{ msg: 'Something went wrong. Please try again .' }]
+//           });
+//         });
+//         // resolve({ success: true, status: status.Ok, msg: 'Success' });
+      
+//     } catch (error) {
+//       reject(error);
+//     }
+//   });
+
+// exports.uploadImage = (req,res) =>
+//   new Promise(async (resolve, reject) => {
+//     try {
+        
+//       const storage = multer.diskStorage({
+//         destination: function (req, file, cb) {
+//           return cb(null, '/uploads')
+//         },
+//         filename: function (req, file, cb) {
+//           const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+//          return  cb(null, file.fieldname + '-' + uniqueSuffix)
+//         }
+//       })
+      
+//       const upload = multer({ storage: storage })
+//       resolve({ success: true, status: status.Ok, msg: 'success'});
+      
+//     } catch (error) {
+//       reject(error);
+//     }
+//   });
 
