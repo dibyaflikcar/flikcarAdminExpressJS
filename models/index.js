@@ -6,4 +6,8 @@ module.exports = {
     city: 'cities',
     color: 'colors',
     fueltype: 'fuelTypes',
+    makeAndModel: 'brand_model_variants',
+    seat: 'seats',
+    ownerType: 'ownerTypes',
+    AuctionVehicle: 'auction_vehicles',
   };

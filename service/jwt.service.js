@@ -7,7 +7,7 @@ exports.generateAccessToken = (req) =>
   new Promise(async (resolve, reject) => {
     try {
       jwt.sign(
-        { email: req.email, id: req.id },
+        { email: req.email, id: req.id, type:req.type },
         process.env.JWT_SECRET,
         {
           algorithm: 'HS512'

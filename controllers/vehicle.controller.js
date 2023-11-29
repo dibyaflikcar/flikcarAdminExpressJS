@@ -6,9 +6,52 @@ const status = require('../utils/status.utils');
 const jwtService = require('../service/jwt.service');
 const jwt = require('jsonwebtoken');
 const multer = require("multer");
+const moment = require('moment');
 
 const db=require('../config/db');
 const collectionName=require('../models');
+
+// Configure multer for handling image uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+exports.makeAndModel = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    try {
+        const snapshot = await db.firestore().collection(collectionName.makeAndModel).get();
+        const result = snapshot.docs.map(doc => doc.data());
+        resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
+      
+    } catch (error) {
+      reject(error);
+    }
+  });
+
+
+  exports.seat = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    try {
+        const snapshot = await db.firestore().collection(collectionName.seat).get();
+        const result = snapshot.docs.map(doc => doc.data());
+        resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
+      
+    } catch (error) {
+      reject(error);
+    }
+  });
+
+
+  exports.ownerType = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    try {
+        const snapshot = await db.firestore().collection(collectionName.ownerType).get();
+        const result = snapshot.docs.map(doc => doc.data());
+        resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
+      
+    } catch (error) {
+      reject(error);
+    }
+  });
 
 exports.bodytype = (req,res) =>
   new Promise(async (resolve, reject) => {
@@ -45,6 +88,103 @@ exports.fueltype = (req,res) =>
       reject(error);
     }
 });
+
+
+
+exports.getAuctionVehicle = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    try {
+        const snapshot = await db.firestore().collection(collectionName.AuctionVehicle).get();
+        const result = snapshot.docs.map(doc => doc.data());
+        resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+
+exports.addAuctionVehicle = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    // const email=req.email;
+    // const password=req.password;
+ 
+    try {
+
+      // const data = JSON.parse(req.body.data);
+      // const images = req.files;
+      // const data = req.body;
+      // const frontImage = req.files['frontImage'][0].buffer.toString('base64');
+      // const backImage = req.files['backImage'][0].buffer.toString('base64');
+      // const sideImage = req.files['sideImage'][0].buffer.toString('base64');
+
+      // console.log(req.brand);
+      // resolve({ success: true, status: status.Ok, msg: 'Data added successfully'});
+
+      const properties ={
+        brand: req.brand,
+        model: req.model,
+        variant: req.variant,
+        fuelType: req.fuelType,
+        bodyType: req.bodyType,
+        color: req.color,
+        seat: req.seat,
+        ownerType: req.ownerType,
+        city: req.city,
+        kmsDriven: req.kmsDriven,
+        registerationYear: req.registerationYear,
+        transmission: req.transmission,
+        engineCC: req.engineCC,
+        maxPower: req.maxPower,
+        mileage: req.mileage,
+        maxTorque: req.maxTorque,
+        noc: req.noc,
+        manufacturingYear: req.manufacturingYear,
+        rtoLocation: req.rtoLocation,
+        inspectionReport: req.inspectionReport,
+        insuranceValidity: req.insuranceValidity,
+        roadTaxValidity: req.roadTaxValidity,
+        inspectionScore: req.inspectionScore,
+        comfort: req.comfort,
+        entertainment: req.entertainment,
+        exterior: req.exterior,
+        safety: req.safety,
+        interior: req.interior,
+      };
+
+      const randomId= new Date().getTime();
+
+      const insertedId =randomId;
+      const uploadedAt =randomId;
+
+      // console.log(uploadedAt);
+      // resolve({ success: true, status: status.Ok, msg: testId});
+
+      await db.firestore().collection(collectionName.test).add({
+        id: insertedId,
+        carPrice: req.carPrice,
+        status: "INACTIVE",
+        properties: properties,
+        uploadedBy: "admin",
+        uploadedAt: uploadedAt,
+        // frontImage: frontImage,
+        // backImage: backImage,
+        // sideImage: sideImage,
+      });
+
+      resolve({ success: true, status: status.Ok, msg: 'Data added successfully'});
+
+        // const snapshot = await db.firestore().collection(collectionName.AuctionVehicle).get();
+        // const result = snapshot.docs.map(doc => doc.data());
+        // resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+
+
 
 
 

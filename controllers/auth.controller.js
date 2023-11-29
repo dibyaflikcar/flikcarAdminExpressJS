@@ -2,7 +2,7 @@
 /* eslint-disable no-async-promise-executor */
 /* eslint-disable no-unused-vars */
 // const db = require('../../models');
-const axios = require('axios');
+// const axios = require('axios');
 const status = require('../utils/status.utils');
 const jwtService = require('../service/jwt.service');
 const jwt = require('jsonwebtoken');
@@ -23,62 +23,79 @@ exports.login = (req,res) =>
 
     const email=req.email;
     const password=req.password;
-    const collectionRef = db.firestore().collection(collectionName.admin);
 
     try {
-          const querySnapshot = await collectionRef
-          .where('email', '==', email)
-          .where('password', '==', password)
-          .get();
-
-        // Check if there are any documents that match the query
-        if (querySnapshot.empty) {
-          resolve({ success: false, status: status.NotFound, msg: 'Invalid Credentials'});
+      const adminSnapshot = await db.firestore().collection(collectionName.admin).where('email', '==', email).get();
+  
+      if (adminSnapshot.empty) {
+        // Admin with the provided email not found
+        resolve({ success: false, status: status.Unauthorized, msg: 'Authentication failed'});
+      }
+  
+      const adminData = adminSnapshot.docs[0].data();
+  
+      if (adminData.password !== password) {
+        // Incorrect password
+        resolve({ success: false, status: status.Unauthorized, msg: 'Authentication failed'});
+      }
+  
+      // Authentication successful
+      req.adminData = adminData;
+      // console.log(req.adminData.type);
+      await jwtService.generateAccessToken({
+        email: req.adminData.email,
+        id: req.adminData.id,
+        type:req.adminData.type
+        // type: 'customer',
+        // name: `${result.fname} ${result.lname}`
+      })
+      .then((token) => {
+        if (token.status === 200) {
+          resolve({
+            success: true,
+            status: status.Ok,
+            data: { access_token: token.token, userId: req.adminData.id }
+          });
+        } else {
+          resolve(token);
         }
-        const snapshot = await db.firestore().collection(collectionName.admin).get();
-        const value = snapshot.docs.map(doc => doc.data());
-        console.log(value.data.id);
-        await jwtService.generateAccessToken({
-                        email: req.email,
-                        id: user.id
-                        // type: 'customer',
-                        // name: `${result.fname} ${result.lname}`
-                      })
-                      .then((token) => {
-                        if (token.status === 200) {
-                          resolve({
-                            success: true,
-                            status: status.Ok,
-                            data: { access_token: token.token, userId: user.id }
-                          });
-                        } else {
-                          resolve(token);
-                        }
-                      })
-                      .catch((e) => {
-                        resolve({
-                          success: false,
-                          extra: e,
-                          status: status.BadRequest,
-                          errors: [{ msg: 'Something went wrong. Please try again .' }]
-                        });
-                      });
-            resolve({ success: true, status: status.Ok, msg: 'Login Success!' });
-
-        // Process the documents that match the query
-        const result = querySnapshot.docs.map(doc => doc.data());
-        resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
-
-
+      })
+      .catch((e) => {
+        resolve({
+          success: false,
+          extra: e,
+          status: status.BadRequest,
+          errors: [{ msg: 'Something went wrong. Please try again .' }]
+        });
+      });
+      resolve({ success: true, status: status.Ok, msg: 'Login Successful'});
+      // next();
+    } catch (error) {
+      console.error('Error authenticating admin:', error);
+      resolve({ success: false, status: status.InternalServerError, msg: 'Internal Server Error'});
+    }
       // const userDoc = await admin.firestore().collection('users').doc(uid).get();
         // const snapshot = await db.firestore().collection(collectionName.admin).get();
         // const result = snapshot.docs.map(doc => doc.data());
         // resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
+   
+  });
+
+  exports.getUser = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    try {
+        const userId= req.auth.id;
+        console.log(req.auth.id);
+        const snapshot = await db.firestore().collection(collectionName.admin).where('id', '==', userId).get();
+        const result = snapshot.docs.map(doc => doc.data());
+        resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
       
     } catch (error) {
       reject(error);
     }
   });
+
+ 
 
 // exports.test = (req,res) =>
 //   new Promise(async (resolve, reject) => {
