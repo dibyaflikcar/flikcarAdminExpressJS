@@ -19,6 +19,36 @@ exports.makeAndModel = (req,res) =>
   new Promise(async (resolve, reject) => {
     try {
         const snapshot = await db.firestore().collection(collectionName.makeAndModel).get();
+
+        const result = [];
+        snapshot.forEach((doc) => {
+          result.push({
+            id: doc.id,
+            data: doc.data(),
+          });
+        });
+
+        // const result = snapshot.docs.map(doc => doc.data());
+        resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
+
+      
+      
+    } catch (error) {
+      reject(error);
+    }
+  });
+
+
+  
+
+  exports.getModel = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    // console.log(req.brandId);
+    try {
+
+        const docRef = db.firestore().collection(collectionName.makeAndModel).doc("Audi");
+        const snapshot = await docRef.get();
+
         const result = snapshot.docs.map(doc => doc.data());
         resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
       
@@ -26,6 +56,11 @@ exports.makeAndModel = (req,res) =>
       reject(error);
     }
   });
+
+  
+
+
+  
 
 
   exports.seat = (req,res) =>
@@ -90,6 +125,18 @@ exports.fueltype = (req,res) =>
 });
 
 
+exports.getAuction = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    try {
+        const snapshot = await db.firestore().collection(collectionName.auction).get();
+        const result = snapshot.docs.map(doc => doc.data());
+        resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
 
 exports.getAuctionVehicle = (req,res) =>
   new Promise(async (resolve, reject) => {
@@ -130,7 +177,7 @@ exports.addAuctionVehicle = (req,res) =>
         color: req.color,
         seat: req.seat,
         ownerType: req.ownerType,
-        city: req.city,
+        city: "Kolkata",
         kmsDriven: req.kmsDriven,
         registerationYear: req.registerationYear,
         transmission: req.transmission,
@@ -170,6 +217,31 @@ exports.addAuctionVehicle = (req,res) =>
         // frontImage: frontImage,
         // backImage: backImage,
         // sideImage: sideImage,
+      });
+
+      
+      const carDetails ={
+        brand: req.brand,
+        model: req.model,
+        variant: req.variant,
+        fuelType: req.fuelType,
+        bodyType: req.bodyType,
+        color: req.color,
+        seat: req.seat,
+        ownerType: req.ownerType,
+        city: req.city,
+        transmission: req.transmission,
+        kmsDriven: req.kmsDriven,
+        registerationYear: req.registerationYear,
+        imagePath: imagePath,
+      };
+
+      await db.firestore().collection(collectionName.auction).add({
+        id: insertedId,
+        carDetails: carDetails,
+        startPrice: req.startPrice,
+        isSoldOut: false,
+        latestBid: null,
       });
 
       resolve({ success: true, status: status.Ok, msg: 'Data added successfully'});

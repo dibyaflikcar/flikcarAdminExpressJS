@@ -10,4 +10,5 @@ module.exports = {
     seat: 'seats',
     ownerType: 'ownerTypes',
     AuctionVehicle: 'auction_vehicles',
+    auction: 'auctions',
   };

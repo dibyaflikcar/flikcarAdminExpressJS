@@ -22,7 +22,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 
-router.get('/makeAndModel', async (req, res, next) => {
+router.get('/makeAndModel',authjwt, async (req, res, next) => {
   // return res.send("hello ok");
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -33,7 +33,21 @@ router.get('/makeAndModel', async (req, res, next) => {
   return res.send(response);
 });
 
-router.get('/bodytype', async (req, res, next) => {
+
+
+router.get('/getModel',authjwt, async (req, res, next) => {
+  // return res.send("hello ok");
+  // console.log(req.query);
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+  }
+  const response = await vehicle.getModel(req.query)
+    .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+  return res.send(response);
+});
+
+router.get('/bodytype',authjwt, async (req, res, next) => {
     // return res.send("hello ok");
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -45,7 +59,7 @@ router.get('/bodytype', async (req, res, next) => {
 });
 
 
-router.get('/color', async (req, res, next) => {
+router.get('/color',authjwt, async (req, res, next) => {
   // return res.send("hello ok");
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -56,7 +70,7 @@ router.get('/color', async (req, res, next) => {
   return res.send(response);
 });
 
-router.get('/fueltype', async (req, res, next) => {
+router.get('/fueltype',authjwt, async (req, res, next) => {
   // return res.send("hello ok");
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -67,7 +81,7 @@ router.get('/fueltype', async (req, res, next) => {
   return res.send(response);
 });
 
-router.get('/seat', async (req, res, next) => {
+router.get('/seat',authjwt, async (req, res, next) => {
   // return res.send("hello ok");
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -78,7 +92,7 @@ router.get('/seat', async (req, res, next) => {
   return res.send(response);
 });
 
-router.get('/ownerType', async (req, res, next) => {
+router.get('/ownerType',authjwt, async (req, res, next) => {
   // return res.send("hello ok");
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -89,8 +103,18 @@ router.get('/ownerType', async (req, res, next) => {
   return res.send(response);
 });
 
+router.get('/auction',authjwt, async (req, res, next) => {
+  // return res.send("hello ok");
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+  }
+  const response = await vehicle.getAuction(req.body)
+    .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+  return res.send(response);
+});
 
-router.get('/getAuctionVehicle', async (req, res, next) => {
+router.get('/getAuctionVehicle',authjwt, async (req, res, next) => {
   // return res.send("hello ok");
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -101,7 +125,7 @@ router.get('/getAuctionVehicle', async (req, res, next) => {
   return res.send(response);
 });
 
-router.post('/addAuctionVehicle', upload.fields([
+router.post('/addAuctionVehicle',authjwt, upload.fields([
   { name: 'frontImage', maxCount: 1 },
   { name: 'backImage', maxCount: 1 },
   { name: 'sideImage', maxCount: 1 },

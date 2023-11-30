@@ -10,7 +10,7 @@ const multer = require("multer");
 
 const router = express.Router();
 
-router.get('/city', async (req, res, next) => {
+router.get('/city',authjwt, async (req, res, next) => {
     // return res.send("hello ok");
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
