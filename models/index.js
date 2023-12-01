@@ -11,4 +11,5 @@ module.exports = {
     ownerType: 'ownerTypes',
     AuctionVehicle: 'auction_vehicles',
     auction: 'auctions',
+    carFeature: 'car_features',
   };

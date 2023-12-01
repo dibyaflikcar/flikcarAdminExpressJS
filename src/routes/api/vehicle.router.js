@@ -103,6 +103,17 @@ router.get('/ownerType',authjwt, async (req, res, next) => {
   return res.send(response);
 });
 
+router.get('/carFeature',authjwt, async (req, res, next) => {
+  // return res.send("hello ok");
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+  }
+  const response = await vehicle.carfeature(req.body)
+    .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+  return res.send(response);
+});
+
 router.get('/auction',authjwt, async (req, res, next) => {
   // return res.send("hello ok");
   const errors = validationResult(req);
@@ -135,7 +146,7 @@ router.post('/addAuctionVehicle',authjwt, upload.fields([
   if (!errors.isEmpty()) {
     return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
   }
-  const response = await vehicle.addAuctionVehicle(req.body)
+  const response = await vehicle.addAuctionVehicle(req)
     .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
   return res.send(response);
 });
