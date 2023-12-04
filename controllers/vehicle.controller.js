@@ -14,6 +14,7 @@ const collectionName=require('../models');
 // Configure multer for handling image uploads
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+const bucket = db.storage().bucket();
 
 exports.makeAndModel = (req,res) =>
   new Promise(async (resolve, reject) => {
@@ -38,9 +39,6 @@ exports.makeAndModel = (req,res) =>
     }
   });
 
-
-  
-
   exports.getModel = (req,res) =>
   new Promise(async (resolve, reject) => {
     // console.log(req.brandId);
@@ -58,11 +56,6 @@ exports.makeAndModel = (req,res) =>
   });
 
   
-
-
-  
-
-
   exports.seat = (req,res) =>
   new Promise(async (resolve, reject) => {
     try {
@@ -169,86 +162,142 @@ exports.addAuctionVehicle = (req,res) =>
   new Promise(async (resolve, reject) => {
     // const email=req.email;
     // const password=req.password;
+
+    // console.log(req.file);
+    // console.log("okk");
+
+    // const ThumbnailPhotos = req.files['ThumbnailPhotos'][0];
+    // const ExteriorPhotos = req.files['ExteriorPhotos'][0];
+    // console.log(ThumbnailPhotos.originalname);
  
     try {
 
-      // const data = JSON.parse(req.body.data);
-      // const images = req.files;
-      // const data = req.body;
-      // const frontImage = req.files['frontImage'][0].buffer.toString('base64');
-      // const backImage = req.files['backImage'][0].buffer.toString('base64');
-      // const sideImage = req.files['sideImage'][0].buffer.toString('base64');
+          const randomId= new Date().getTime();
+          const insertedId =String(randomId);
+          const uploadedAt =randomId;
 
-      // console.log(req.brand);
-      // resolve({ success: true, status: status.Ok, msg: 'Data added successfully'});
+          // const ThumbnailPhotos = req.files['ThumbnailPhotos'][0];
+          // const ExteriorPhotos = req.files['ExteriorPhotos'][0];
+
+         
+
+        const image = req.file;
+
+        // Upload image to Firebase Cloud Storage
+        const storageRef = bucket.file(randomId+"_"+image.originalname);
+        const blobStream = storageRef.createWriteStream();
+        blobStream.on('finish', async () => {
+          // Generate download URL
+          const downloadUrl = await storageRef.getSignedUrl({
+            action: 'read',
+            expires: '01-01-2100', // Adjust the expiration date as needed
+          });
+          // console.log(downloadUrl[0]);
+          const fileUrl=downloadUrl[0];
+          let images = [];
+            images.push({
+              path: fileUrl,
+              type:"THUMB"
+            });
+
+          
+          const carDetails ={
+            id: insertedId,
+            brand: req.body.brand,
+            model: req.body.model,
+            variant: req.body.variant,
+            fuelType: req.body.fuelType,
+            bodyType: req.body.bodyType,
+            color: req.body.color,
+            seat: Number(req.body.seat),
+            ownerType: req.body.ownerType,
+            city: "Kolkata",
+            transmission: req.body.transmission,
+            kmsDriven: Number(req.body.kmsDriven),
+            registerationYear: Number(req.body.regYear),
+            imagePath: fileUrl,
+          };
+          const properties ={
+            brand: req.body.brand,
+            model: req.body.model,
+            variant: req.body.variant,
+            fuelType: req.body.fuelType,
+            bodyType: req.body.bodyType,
+            color: req.body.color,
+            seat: Number(req.body.seat),
+            ownerType: req.body.ownerType,
+            city: "Kolkata",
+            kmsDriven: Number(req.body.kmsDriven),
+            registerationYear: Number(req.body.regYear),
+            transmission: req.body.transmission,
+            engineCC: Number(req.body.engine),
+            maxPower: Number(req.body.maxPower),
+            mileage: Number(req.body.mileage),
+            maxTorque: Number(req.body.maxTorque),
+            noc: req.body.noc,
+            manufacturingYear: Number(req.body.mfgYear),
+            rtoLocation: req.body.rto,
+            inspectionReport: req.body.inspectionReport,
+            insuranceValidity: new Date(req.body.insuranceValidity).getTime(),
+            roadTaxValidity: new Date(req.body.roadTaxValidity).getTime(),
+            inspectionScore: Number(req.body.inspectionScore),
+            comfort: req.body.comforts.split(','),
+            entertainment: req.body.entertainment.split(','),
+            exterior: req.body.exterior.split(','),
+            safety: req.body.safety.split(','),
+            interior: req.body.interior.split(','),
+          };
+
+          // await db.firestore().collection(collectionName.AuctionVehicle).doc(insertedId).set({
+          await db.firestore().collection(collectionName.test).doc(insertedId).set({
+            id: insertedId,
+            carPrice: Number(req.body.carPrice),
+            images: images,
+            status: "INACTIVE",
+            properties: properties,
+            uploadedBy: "admin",
+            uploadedAt: uploadedAt,
+            // frontImage: frontImage,
+            // backImage: backImage,
+            // sideImage: sideImage,
+          });
+
+      //     await db.firestore().collection(collectionName.auction).doc(insertedId).set({
+      //   id: insertedId,
+      //   carDetails: carDetails,
+      //   startPrice: Number(req.body.carPrice),
+      //   isSoldOut: false,
+      //   latestBid: null,
+      //   startTime:uploadedAt,
+      //   endTime:uploadedAt
+      // });
+
+          
+
+
+        });
+
+        blobStream.end(image.buffer);
       
-      const properties ={
-        brand: req.body.brand,
-        model: req.body.model,
-        variant: req.body.variant,
-        fuelType: req.body.fuelType,
-        bodyType: req.body.bodyType,
-        color: req.body.color,
-        seat: req.body.seat,
-        ownerType: req.body.ownerType,
-        city: "Kolkata",
-        kmsDriven: Number(req.body.kmsDriven),
-        registerationYear: Number(req.body.regYear),
-        transmission: req.body.transmission,
-        engineCC: Number(req.body.engine),
-        maxPower: Number(req.body.maxPower),
-        mileage: Number(req.body.mileage),
-        maxTorque: Number(req.body.maxTorque),
-        noc: req.body.noc,
-        manufacturingYear: Number(req.body.mfgYear),
-        rtoLocation: req.body.rto,
-        inspectionReport: req.body.inspectionReport,
-        insuranceValidity: req.body.insuranceValidity,
-        roadTaxValidity: req.body.roadTaxValidity,
-        inspectionScore: Number(req.body.inspectionScore),
-        comfort: req.body.comforts.split(','),
-        entertainment: req.body.entertainment.split(','),
-        exterior: req.body.exterior.split(','),
-        safety: req.body.safety.split(','),
-        interior: req.body.interior.split(','),
-      };
-
-      const randomId= new Date().getTime();
-
-      const insertedId =randomId;
-      const uploadedAt =randomId;
+      
 
       // console.log(uploadedAt);
       // resolve({ success: true, status: status.Ok, msg: testId});
 
-      await db.firestore().collection(collectionName.test).add({
-        id: insertedId,
-        carPrice: Number(req.body.carPrice),
-        status: "INACTIVE",
-        properties: properties,
-        uploadedBy: "admin",
-        uploadedAt: uploadedAt,
-        // frontImage: frontImage,
-        // backImage: backImage,
-        // sideImage: sideImage,
-      });
+      // let images = [];
+      // for (let index = 0; index < req.files.length; index++) {
+      //   images.push({
+      //     path: `uploads/dealer/vehicleImage/${req.files[index].filename}`,
+      //     type:"Thumb"
+      //   });
+      // }
 
       
-      const carDetails ={
-        brand: req.body.brand,
-        model: req.body.model,
-        variant: req.body.variant,
-        fuelType: req.body.fuelType,
-        bodyType: req.body.bodyType,
-        color: req.body.color,
-        seat: req.body.seat,
-        ownerType: req.body.ownerType,
-        city: "Kolkata",
-        transmission: req.body.transmission,
-        kmsDriven: req.body.kmsDriven,
-        registerationYear: req.body.regYear,
-        // imagePath: imagePath,
-      };
+
+      
+
+
+      
 
       // await db.firestore().collection(collectionName.auction).add({
       //   id: insertedId,

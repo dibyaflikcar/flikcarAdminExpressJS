@@ -6,20 +6,16 @@ const vehicle = require('../../../controllers/vehicle.controller');
 const status = require('../../../utils/status.utils');
 const authjwt = require('../../../middleware/authjwt');
 const multer = require("multer");
+const db=require('../../../config/db');
+
 
 
 const router = express.Router();
+
+
 const storage = multer.memoryStorage();
-// const storage = multer.diskStorage({
-  //         destination: function (req, file, cb) {
-  //           return cb(null, '/uploads')
-  //         },
-  //         filename: function (req, file, cb) {
-  //           const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-  //          return  cb(null, file.fieldname + '-' + uniqueSuffix)
-  //         }
-  //       })
 const upload = multer({ storage: storage });
+const bucket = db.storage().bucket();
 
 
 router.get('/makeAndModel',authjwt, async (req, res, next) => {
@@ -32,7 +28,6 @@ router.get('/makeAndModel',authjwt, async (req, res, next) => {
     .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
   return res.send(response);
 });
-
 
 
 router.get('/getModel',authjwt, async (req, res, next) => {
@@ -136,12 +131,14 @@ router.get('/getAuctionVehicle',authjwt, async (req, res, next) => {
   return res.send(response);
 });
 
-router.post('/addAuctionVehicle',authjwt, upload.fields([
-  { name: 'frontImage', maxCount: 1 },
-  { name: 'backImage', maxCount: 1 },
-  { name: 'sideImage', maxCount: 1 },
-]) ,async (req, res, next) => {
-  // return res.send("hello ok");
+// router.post('/addAuctionVehicle',multer({ storage: fileUpload.auctionCarFileStorage() }).array('ThumbnailPhotos') ,authjwt,async (req, res, next) => {
+router.post('/addAuctionVehicle',upload.single('ThumbnailPhotos') ,authjwt,async (req, res, next) => {
+// router.post('/addAuctionVehicle',upload.fields([{ name: 'ThumbnailPhotos', maxCount: 1 }, { name: 'ExteriorPhotos', maxCount: 1 }]) ,authjwt,async (req, res, next) => {
+  // return res.send(ThumbnailPhotos);
+
+  // const ThumbnailPhotos = req.files['ThumbnailPhotos'][0];
+  // const ExteriorPhotos = req.files['ExteriorPhotos'][0];
+        
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
