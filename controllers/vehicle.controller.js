@@ -160,15 +160,6 @@ exports.getAuctionVehicle = (req,res) =>
 
 exports.addAuctionVehicle = (req,res) =>
   new Promise(async (resolve, reject) => {
-    // const email=req.email;
-    // const password=req.password;
-
-    // console.log(req.file);
-    // console.log("okk");
-
-    // const ThumbnailPhotos = req.files['ThumbnailPhotos'][0];
-    // const ExteriorPhotos = req.files['ExteriorPhotos'][0];
-    // console.log(ThumbnailPhotos.originalname);
  
     try {
 
@@ -176,29 +167,8 @@ exports.addAuctionVehicle = (req,res) =>
           const insertedId =String(randomId);
           const uploadedAt =randomId;
 
-          // const ThumbnailPhotos = req.files['ThumbnailPhotos'][0];
-          // const ExteriorPhotos = req.files['ExteriorPhotos'][0];
-
-         
-
-        const image = req.file;
-
-        // Upload image to Firebase Cloud Storage
-        const storageRef = bucket.file(randomId+"_"+image.originalname);
-        const blobStream = storageRef.createWriteStream();
-        blobStream.on('finish', async () => {
-          // Generate download URL
-          const downloadUrl = await storageRef.getSignedUrl({
-            action: 'read',
-            expires: '01-01-2100', // Adjust the expiration date as needed
-          });
-          // console.log(downloadUrl[0]);
-          const fileUrl=downloadUrl[0];
-          let images = [];
-            images.push({
-              path: fileUrl,
-              type:"THUMB"
-            });
+          const auctionStartTime=new Date(req.body.auctionStartTime).getTime();
+          const auctionEndTime=new Date(req.body.auctionEndTime).getTime();
 
           
           const carDetails ={
@@ -215,8 +185,10 @@ exports.addAuctionVehicle = (req,res) =>
             transmission: req.body.transmission,
             kmsDriven: Number(req.body.kmsDriven),
             registerationYear: Number(req.body.regYear),
-            imagePath: fileUrl,
+            imagePath: req.body.thumbImage[0].path,
           };
+
+          // console.log(carDetails);
           const properties ={
             brand: req.body.brand,
             model: req.body.model,
@@ -241,44 +213,40 @@ exports.addAuctionVehicle = (req,res) =>
             insuranceValidity: new Date(req.body.insuranceValidity).getTime(),
             roadTaxValidity: new Date(req.body.roadTaxValidity).getTime(),
             inspectionScore: Number(req.body.inspectionScore),
-            comfort: req.body.comforts.split(','),
-            entertainment: req.body.entertainment.split(','),
-            exterior: req.body.exterior.split(','),
-            safety: req.body.safety.split(','),
-            interior: req.body.interior.split(','),
+            comfort: req.body.comforts,
+            entertainment: req.body.entertainment,
+            exterior: req.body.exterior,
+            safety: req.body.safety,
+            interior: req.body.interior,
           };
 
-          // await db.firestore().collection(collectionName.AuctionVehicle).doc(insertedId).set({
-          await db.firestore().collection(collectionName.test).doc(insertedId).set({
+          // console.log(properties);
+
+          // await db.firestore().collection(collectionName.test).doc(insertedId).set({
+
+
+          await db.firestore().collection(collectionName.AuctionVehicle).doc(insertedId).set({
             id: insertedId,
             carPrice: Number(req.body.carPrice),
-            images: images,
+            images: req.body.allCarImage,
             status: "INACTIVE",
             properties: properties,
             uploadedBy: "admin",
             uploadedAt: uploadedAt,
-            // frontImage: frontImage,
-            // backImage: backImage,
-            // sideImage: sideImage,
           });
 
-      //     await db.firestore().collection(collectionName.auction).doc(insertedId).set({
-      //   id: insertedId,
-      //   carDetails: carDetails,
-      //   startPrice: Number(req.body.carPrice),
-      //   isSoldOut: false,
-      //   latestBid: null,
-      //   startTime:uploadedAt,
-      //   endTime:uploadedAt
-      // });
+          await db.firestore().collection(collectionName.auction).doc(insertedId).set({
+        id: insertedId,
+        carDetails: carDetails,
+        startPrice: Number(req.body.carPrice),
+        isSoldOut: false,
+        latestBid: null,
+        startTime:auctionStartTime,
+        endTime:auctionEndTime
+      });
 
-          
+      resolve({ success: true, status: status.Ok, msg: 'Data added successfully'});
 
-
-        });
-
-        blobStream.end(image.buffer);
-      
       
 
       // console.log(uploadedAt);
@@ -292,13 +260,6 @@ exports.addAuctionVehicle = (req,res) =>
       //   });
       // }
 
-      
-
-      
-
-
-      
-
       // await db.firestore().collection(collectionName.auction).add({
       //   id: insertedId,
       //   carDetails: carDetails,
@@ -307,8 +268,7 @@ exports.addAuctionVehicle = (req,res) =>
       //   latestBid: null,
       // });
 
-      resolve({ success: true, status: status.Ok, msg: 'Data added successfully'});
-
+      
         // const snapshot = await db.firestore().collection(collectionName.AuctionVehicle).get();
         // const result = snapshot.docs.map(doc => doc.data());
         // resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
@@ -317,6 +277,249 @@ exports.addAuctionVehicle = (req,res) =>
       reject(error);
     }
 });
+
+
+exports.uploadAuctionImage = (req,res) =>
+  new Promise(async (resolve, reject) => {
+
+    try {
+
+          const randomId= new Date().getTime();
+          const image = req.file;
+          // console.log(image);
+
+        // Upload image to Firebase Cloud Storage
+        const storageRef = bucket.file(randomId+"_"+image.originalname);
+        const blobStream = storageRef.createWriteStream();
+        blobStream.on('finish', async () => {
+          // Generate download URL
+          const downloadUrl = await storageRef.getSignedUrl({
+            action: 'read',
+            expires: '01-01-2100', // Adjust the expiration date as needed
+          });
+          // console.log(downloadUrl[0]);
+          const fileUrl=downloadUrl[0];
+          // let images = [];
+          //   images.push({
+          //     path: fileUrl,
+          //     type:"THUMB"
+          //   });
+
+          let images = {
+              path: fileUrl,
+              type:"THUMB"
+            };
+            resolve({ success: true, status: status.Ok, msg: 'success', data:images});
+        });
+
+        blobStream.end(image.buffer);
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+exports.uploadAuctionImage2 = (req,res) =>
+  new Promise(async (resolve, reject) => {
+
+    try {
+
+          const randomId= new Date().getTime();
+          const image = req.file;
+          // console.log(image);
+
+        // Upload image to Firebase Cloud Storage
+        const storageRef = bucket.file(randomId+"_"+image.originalname);
+        const blobStream = storageRef.createWriteStream();
+        blobStream.on('finish', async () => {
+          // Generate download URL
+          const downloadUrl = await storageRef.getSignedUrl({
+            action: 'read',
+            expires: '01-01-2100', // Adjust the expiration date as needed
+          });
+          // console.log(downloadUrl[0]);
+          const fileUrl=downloadUrl[0];
+          // let images = [];
+          //   images.push({
+          //     path: fileUrl,
+          //     type:"EXT"
+          //   });
+
+            let images = {
+              path: fileUrl,
+              type:"EXT"
+            };
+            resolve({ success: true, status: status.Ok, msg: 'success', data:images});
+        });
+
+        blobStream.end(image.buffer);
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+exports.uploadAuctionImage3 = (req,res) =>
+  new Promise(async (resolve, reject) => {
+
+    try {
+
+          const randomId= new Date().getTime();
+          const image = req.file;
+          // console.log(image);
+
+        // Upload image to Firebase Cloud Storage
+        const storageRef = bucket.file(randomId+"_"+image.originalname);
+        const blobStream = storageRef.createWriteStream();
+        blobStream.on('finish', async () => {
+          // Generate download URL
+          const downloadUrl = await storageRef.getSignedUrl({
+            action: 'read',
+            expires: '01-01-2100', // Adjust the expiration date as needed
+          });
+          // console.log(downloadUrl[0]);
+          const fileUrl=downloadUrl[0];
+          // let images = [];
+          //   images.push({
+          //     path: fileUrl,
+          //     type:"EXT"
+          //   });
+
+            let images = {
+              path: fileUrl,
+              type:"INT"
+            };
+            resolve({ success: true, status: status.Ok, msg: 'success', data:images});
+        });
+
+        blobStream.end(image.buffer);
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+exports.uploadAuctionImage4 = (req,res) =>
+  new Promise(async (resolve, reject) => {
+
+    try {
+
+          const randomId= new Date().getTime();
+          const image = req.file;
+          // console.log(image);
+
+        // Upload image to Firebase Cloud Storage
+        const storageRef = bucket.file(randomId+"_"+image.originalname);
+        const blobStream = storageRef.createWriteStream();
+        blobStream.on('finish', async () => {
+          // Generate download URL
+          const downloadUrl = await storageRef.getSignedUrl({
+            action: 'read',
+            expires: '01-01-2100', // Adjust the expiration date as needed
+          });
+          // console.log(downloadUrl[0]);
+          const fileUrl=downloadUrl[0];
+          // let images = [];
+          //   images.push({
+          //     path: fileUrl,
+          //     type:"EXT"
+          //   });
+
+            let images = {
+              path: fileUrl,
+              type:"ENGINE"
+            };
+            resolve({ success: true, status: status.Ok, msg: 'success', data:images});
+        });
+
+        blobStream.end(image.buffer);
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+exports.uploadAuctionImage5 = (req,res) =>
+  new Promise(async (resolve, reject) => {
+
+    try {
+
+          const randomId= new Date().getTime();
+          const image = req.file;
+          // console.log(image);
+
+        // Upload image to Firebase Cloud Storage
+        const storageRef = bucket.file(randomId+"_"+image.originalname);
+        const blobStream = storageRef.createWriteStream();
+        blobStream.on('finish', async () => {
+          // Generate download URL
+          const downloadUrl = await storageRef.getSignedUrl({
+            action: 'read',
+            expires: '01-01-2100', // Adjust the expiration date as needed
+          });
+          // console.log(downloadUrl[0]);
+          const fileUrl=downloadUrl[0];
+          // let images = [];
+          //   images.push({
+          //     path: fileUrl,
+          //     type:"EXT"
+          //   });
+
+            let images = {
+              path: fileUrl,
+              type:"TYRE"
+            };
+            resolve({ success: true, status: status.Ok, msg: 'success', data:images});
+        });
+
+        blobStream.end(image.buffer);
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+exports.uploadAuctionImage6 = (req,res) =>
+  new Promise(async (resolve, reject) => {
+
+    try {
+
+          const randomId= new Date().getTime();
+          const image = req.file;
+          // console.log(image);
+
+        // Upload image to Firebase Cloud Storage
+        const storageRef = bucket.file(randomId+"_"+image.originalname);
+        const blobStream = storageRef.createWriteStream();
+        blobStream.on('finish', async () => {
+          // Generate download URL
+          const downloadUrl = await storageRef.getSignedUrl({
+            action: 'read',
+            expires: '01-01-2100', // Adjust the expiration date as needed
+          });
+          // console.log(downloadUrl[0]);
+          const fileUrl=downloadUrl[0];
+          // let images = [];
+          //   images.push({
+          //     path: fileUrl,
+          //     type:"EXT"
+          //   });
+
+            let images = {
+              path: fileUrl,
+              type:"DENT"
+            };
+            resolve({ success: true, status: status.Ok, msg: 'success', data:images});
+        });
+
+        blobStream.end(image.buffer);
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+
 
 
 
