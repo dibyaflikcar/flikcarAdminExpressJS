@@ -148,6 +148,36 @@ router.post('/addAuctionVehicle' ,authjwt,async (req, res, next) => {
   return res.send(response);
 });
 
+router.post('/addAuctionVehicle' ,authjwt,async (req, res, next) => {
+  // router.post('/addAuctionVehicle',upload.fields([{ name: 'ThumbnailPhotos', maxCount: 1 }, { name: 'ExteriorPhotos', maxCount: 1 }]) ,authjwt,async (req, res, next) => {
+    // return res.send(ThumbnailPhotos);
+  
+    // const ThumbnailPhotos = req.files['ThumbnailPhotos'][0];
+    // const ExteriorPhotos = req.files['ExteriorPhotos'][0];
+          
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+    }
+    const response = await vehicle.addAuctionVehicle(req)
+      .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+    return res.send(response);
+  });
+
+
+  router.post('/getAuctionCarDetails' ,authjwt,async (req, res, next) => { 
+    // console.log(req.body.id);
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+      }
+      const response = await vehicle.getAuctionCarDetails(req)
+        .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+      return res.send(response);
+    });
+
+  
+
 
 router.post('/uploadAuctionImage',upload.single('file') ,authjwt,async (req, res, next) => {
 

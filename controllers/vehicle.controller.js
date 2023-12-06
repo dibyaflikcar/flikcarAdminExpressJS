@@ -21,15 +21,15 @@ exports.makeAndModel = (req,res) =>
     try {
         const snapshot = await db.firestore().collection(collectionName.makeAndModel).get();
 
-        const result = [];
-        snapshot.forEach((doc) => {
-          result.push({
-            id: doc.id,
-            data: doc.data(),
-          });
-        });
+        // const result = [];
+        // snapshot.forEach((doc) => {
+        //   result.push({
+        //     // id: doc.id,
+        //     data: doc.data(),
+        //   });
+        // });
 
-        // const result = snapshot.docs.map(doc => doc.data());
+        const result = snapshot.docs.map(doc => doc.data());
         resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
 
       
@@ -157,6 +157,21 @@ exports.getAuctionVehicle = (req,res) =>
     }
 });
 
+exports.getAuctionCarDetails = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    const id=String(req.body.id);
+    try {
+        const snapshot = await db.firestore().collection(collectionName.AuctionVehicle).doc(id).get();
+        const result = snapshot.data();
+        resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+
+
 
 exports.addAuctionVehicle = (req,res) =>
   new Promise(async (resolve, reject) => {
@@ -171,6 +186,8 @@ exports.addAuctionVehicle = (req,res) =>
           const auctionEndTime=new Date(req.body.auctionEndTime).getTime();
 
           
+          
+          
           const carDetails ={
             id: insertedId,
             brand: req.body.brand,
@@ -184,7 +201,7 @@ exports.addAuctionVehicle = (req,res) =>
             city: "Kolkata",
             transmission: req.body.transmission,
             kmsDriven: Number(req.body.kmsDriven),
-            registerationYear: Number(req.body.regYear),
+            registrationYear: Number(req.body.regYear),
             imagePath: req.body.thumbImage[0].path,
           };
 
@@ -198,9 +215,10 @@ exports.addAuctionVehicle = (req,res) =>
             color: req.body.color,
             seat: Number(req.body.seat),
             ownerType: req.body.ownerType,
+            carDescription: req.body.description,
             city: "Kolkata",
             kmsDriven: Number(req.body.kmsDriven),
-            registerationYear: Number(req.body.regYear),
+            registrationYear: Number(req.body.regYear),
             transmission: req.body.transmission,
             engineCC: Number(req.body.engine),
             maxPower: Number(req.body.maxPower),
