@@ -12,4 +12,5 @@ module.exports = {
     AuctionVehicle: 'auction_vehicles',
     auction: 'auctions',
     carFeature: 'car_features',
+    vehicleEnquiry: 'sell_vehicle_enquiries',
   };

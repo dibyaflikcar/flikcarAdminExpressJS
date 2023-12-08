@@ -93,7 +93,7 @@ exports.bodytype = (req,res) =>
     }
   });
 
-  exports.carfeature = (req,res) =>
+  exports.carFeature = (req,res) =>
   new Promise(async (resolve, reject) => {
     try {
         const snapshot = await db.firestore().collection(collectionName.carFeature).get();
@@ -170,13 +170,37 @@ exports.getAuctionCarDetails = (req,res) =>
     }
 });
 
+exports.getAuctionDetails = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    const id=String(req.body.id);
+    try {
+        const snapshot = await db.firestore().collection(collectionName.auction).doc(id).get();
+        const result = snapshot.data();
+        resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
 
-
+exports.deleteAuctionVehicle = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    const id=String(req.body.id);
+    try {
+        const delete1 = await db.firestore().collection(collectionName.auction).doc(id).delete();
+        const delete2 = await db.firestore().collection(collectionName.AuctionVehicle).doc(id).delete();
+        resolve({ success: true, status: status.Ok, msg: 'success'});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
 
 exports.addAuctionVehicle = (req,res) =>
   new Promise(async (resolve, reject) => {
  
     try {
+
 
           const randomId= new Date().getTime();
           const insertedId =String(randomId);
@@ -185,8 +209,6 @@ exports.addAuctionVehicle = (req,res) =>
           const auctionStartTime=new Date(req.body.auctionStartTime).getTime();
           const auctionEndTime=new Date(req.body.auctionEndTime).getTime();
 
-          
-          
           
           const carDetails ={
             id: insertedId,
@@ -287,6 +309,97 @@ exports.addAuctionVehicle = (req,res) =>
       // });
 
       
+        // const snapshot = await db.firestore().collection(collectionName.AuctionVehicle).get();
+        // const result = snapshot.docs.map(doc => doc.data());
+        // resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+exports.updateAuctionVehicle = (req,res) =>
+  new Promise(async (resolve, reject) => {
+ 
+    try {
+
+        const docId =req.body.docId;
+
+        const insuranceValidity =  new Date(req.body.insuranceValidity).getTime();
+        const roadTaxValidity = new Date(req.body.roadTaxValidity).getTime(); 
+        const auctionStartTime=new Date(req.body.auctionStartTime).getTime(); 
+        const auctionEndTime = new Date(req.body.auctionEndTime).getTime(); 
+
+          const carDetails ={
+            brand: req.body.brand,
+            model: req.body.model,
+            variant: req.body.variant,
+            fuelType: req.body.fuelType,
+            bodyType: req.body.bodyType,
+            color: req.body.color,
+            seat: req.body.seat,
+            ownerType: req.body.ownerType,
+            city: "Kolkata",
+            transmission: req.body.transmission,
+            kmsDriven: req.body.kmsDriven,
+            registrationYear: req.body.regYear,
+            imagePath: req.body.thumbImage,
+          };
+
+          // console.log(carDetails);
+          
+          const properties ={
+            brand: req.body.brand,
+            model: req.body.model,
+            variant: req.body.variant,
+            fuelType: req.body.fuelType,
+            bodyType: req.body.bodyType,
+            color: req.body.color,
+            seat: req.body.seat,
+            ownerType: req.body.ownerType,
+            carDescription: req.body.description,
+            city: "Kolkata",
+            kmsDriven: req.body.kmsDriven,
+            registrationYear: req.body.regYear,
+            transmission: req.body.transmission,
+            engineCC: req.body.engine,
+            maxPower: req.body.maxPower,
+            mileage: req.body.mileage,
+            maxTorque: req.body.maxTorque,
+            noc: req.body.noc,
+            manufacturingYear: req.body.mfgYear,
+            rtoLocation: req.body.rto,
+            inspectionReport: req.body.inspectionReport,
+            insuranceValidity: insuranceValidity,
+            roadTaxValidity: roadTaxValidity,
+            inspectionScore: req.body.inspectionScore,
+            comfort: req.body.comforts,
+            entertainment: req.body.entertainment,
+            exterior: req.body.exterior,
+            safety: req.body.safety,
+            interior: req.body.interior,
+          };
+
+          // console.log(properties);
+
+          await db.firestore().collection(collectionName.AuctionVehicle).doc(docId).update({
+            carPrice: req.body.carPrice,
+            images: req.body.allCarImage,
+            // status: "INACTIVE",
+            properties: properties,
+          });
+
+          await db.firestore().collection(collectionName.auction).doc(docId).update({
+            carDetails: carDetails,
+            startPrice: Number(req.body.carPrice),
+            isSoldOut: req.body.carsoldStatus,
+            startTime:auctionStartTime,
+            endTime:auctionEndTime
+          });
+         
+
+      resolve({ success: true, status: status.Ok, msg: 'Data updated successfully'});
+
         // const snapshot = await db.firestore().collection(collectionName.AuctionVehicle).get();
         // const result = snapshot.docs.map(doc => doc.data());
         // resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
@@ -536,6 +649,84 @@ exports.uploadAuctionImage6 = (req,res) =>
       reject(error);
     }
 });
+
+
+// vehicle enquiry start here
+exports.getVehicleEnquiry = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    try {
+        const snapshot = await db.firestore().collection(collectionName.vehicleEnquiry).get();
+        const result = snapshot.docs.map(doc => doc.data());
+        resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+exports.deleteVehicleEnquiry = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    const id=String(req.body.id);
+    try {
+        const delete1 = await db.firestore().collection(collectionName.vehicleEnquiry).doc(id).delete();
+        resolve({ success: true, status: status.Ok, msg: 'success'});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+// Brand start here
+
+exports.getBrand = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    try {
+        const snapshot = await db.firestore().collection(collectionName.makeAndModel).get();
+
+        const result = [];
+        snapshot.forEach((doc) => {
+          result.push({
+            id: doc.id,
+            data: doc.data(),
+          });
+        });
+
+        // const result = snapshot.docs.map(doc => doc.data());
+        resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
+
+      
+      
+    } catch (error) {
+      reject(error);
+    }
+  });
+exports.addBrand = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    const insertedId=String(req.body.brand);
+    try {
+      await db.firestore().collection(collectionName.makeAndModel).doc(insertedId).set({
+        name: req.body.brand,
+        models:null,
+      });
+        resolve({ success: true, status: status.Ok, msg: 'success'});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+exports.deleteBrand = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    const id=String(req.body.id);
+    try {
+        const delete1 = await db.firestore().collection(collectionName.makeAndModel).doc(id).delete();
+        resolve({ success: true, status: status.Ok, msg: 'success'});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+
 
 
 
