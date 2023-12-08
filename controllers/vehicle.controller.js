@@ -682,7 +682,6 @@ exports.getBrand = (req,res) =>
   new Promise(async (resolve, reject) => {
     try {
         const snapshot = await db.firestore().collection(collectionName.makeAndModel).get();
-
         const result = [];
         snapshot.forEach((doc) => {
           result.push({
@@ -690,12 +689,8 @@ exports.getBrand = (req,res) =>
             data: doc.data(),
           });
         });
-
         // const result = snapshot.docs.map(doc => doc.data());
         resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
-
-      
-      
     } catch (error) {
       reject(error);
     }
@@ -714,6 +709,20 @@ exports.addBrand = (req,res) =>
       reject(error);
     }
 });
+exports.updateBrand = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    const insertedId=String(req.body.docId);
+    try {
+      await db.firestore().collection(collectionName.makeAndModel).doc(insertedId).update({
+        name: req.body.brand
+      });
+        resolve({ success: true, status: status.Ok, msg: 'success'});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
 exports.deleteBrand = (req,res) =>
   new Promise(async (resolve, reject) => {
     const id=String(req.body.id);
@@ -725,6 +734,142 @@ exports.deleteBrand = (req,res) =>
       reject(error);
     }
 });
+
+// Model start here
+exports.getBrandwithID = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    const docId=String(req.body.id);
+    // console.log(docId);
+    try {
+        const snapshot = await db.firestore().collection(collectionName.makeAndModel).doc(docId).get();
+        // console.log(snapshot.data());
+        // const result = [];
+        // snapshot.forEach((doc) => {
+        //   result.push({
+        //     id: doc.id,
+        //     data: doc.data(),
+        //   });
+        // });
+        const result = snapshot.data();
+        resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
+    } catch (error) {
+      reject(error);
+    }
+  });
+
+  exports.addModel = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    const docId=String(req.body.docId);
+    try {
+      
+      const snapshot=await db.firestore().collection(collectionName.makeAndModel).doc(docId).get();
+      const result = snapshot.data();
+      // console.log(result.models);
+      let myArray = result.models;
+      
+      const valueToCheck = req.body.model;
+      const exists = myArray.some(obj => Object.values(obj).includes(valueToCheck));
+      if(exists==true)
+      {
+        resolve({ success: false, status: status.Found, msg: 'error'});
+      }
+      else
+      {
+          const newItem = {
+            name:req.body.model,
+            variants:null,
+          }; 
+          myArray.push(newItem);
+
+          await db.firestore().collection(collectionName.makeAndModel).doc(docId).update({
+            models: myArray,
+          });
+      
+          resolve({ success: true, status: status.Ok, msg: 'success'});
+      }
+     
+      
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+exports.updateModel = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    const docId=String(req.body.docId);
+    const model=req.body.model;
+    const indexId=parseInt(req.body.indexId, 10);
+    try {
+      
+      const snapshot=await db.firestore().collection(collectionName.makeAndModel).doc(docId).get();
+      const result = snapshot.data();
+      // console.log(result.models);
+      let myArray = result.models;
+      // console.log(myArray);
+
+      if (indexId >= 0 && indexId < myArray.length) {
+        // Update the value in the specific object at the given index
+        myArray[indexId].name = model;
+      }
+
+          await db.firestore().collection(collectionName.makeAndModel).doc(docId).update({
+            models: myArray,
+          });
+      
+          resolve({ success: true, status: status.Ok, msg: 'success'});  
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+exports.deleteModel = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    const docId=String(req.body.docId);
+    const indexId=parseInt(req.body.indexId, 10);
+    try {
+      
+      const snapshot=await db.firestore().collection(collectionName.makeAndModel).doc(docId).get();
+      const result = snapshot.data();
+      // console.log(result.models);
+      let myArray = result.models;
+
+      if (indexId >= 0 && indexId < myArray.length) {
+        myArray.splice(indexId, 1);
+      }
+      // console.log(myArray);
+
+        await db.firestore().collection(collectionName.makeAndModel).doc(docId).update({
+          models: myArray,
+        });
+    
+        resolve({ success: true, status: status.Ok, msg: 'success'});  
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+// user start here
+exports.getUsers = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    try {
+        const snapshot = await db.firestore().collection(collectionName.users).get();
+        const result = snapshot.docs.map(doc => doc.data());
+        resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+
+
+
+
+  
+
 
 
 

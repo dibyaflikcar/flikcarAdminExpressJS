@@ -323,6 +323,16 @@ router.post('/deleteVehicleEnquiry' ,authjwt,async (req, res, next) => {
         .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
       return res.send(response);
     });
+    router.post('/updateBrand' ,authjwt,async (req, res, next) => { 
+      // console.log("docID "+req.body.id);
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+          return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+        }
+        const response = await vehicle.updateBrand(req)
+          .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+        return res.send(response);
+      });
   router.post('/deleteBrand' ,authjwt,async (req, res, next) => { 
       // console.log("docID "+req.body.id);
         const errors = validationResult(req);
@@ -334,6 +344,67 @@ router.post('/deleteVehicleEnquiry' ,authjwt,async (req, res, next) => {
         return res.send(response);
   });
     
+// Model start here
+router.post('/getBrandwithID' ,authjwt,async (req, res, next) => { 
+  // console.log("docID "+req.body.id);
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+    }
+    const response = await vehicle.getBrandwithID(req)
+      .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+    return res.send(response);
+  });
+  router.post('/addModel' ,authjwt,async (req, res, next) => { 
+    // console.log("docID "+req.body.id);
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+      }
+      const response = await vehicle.addModel(req)
+        .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+      return res.send(response);
+    });
+    router.post('/updateModel' ,authjwt,async (req, res, next) => { 
+      // console.log("docID "+req.body.id);
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+          return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+        }
+        const response = await vehicle.updateModel(req)
+          .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+        return res.send(response);
+      });
+
+      router.post('/deleteModel' ,authjwt,async (req, res, next) => { 
+        // console.log("docID "+req.body.id);
+          const errors = validationResult(req);
+          if (!errors.isEmpty()) {
+            return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+          }
+          const response = await vehicle.deleteModel(req)
+            .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+          return res.send(response);
+        });
+
+// user start here
+router.get('/getUsers',authjwt, async (req, res, next) => {
+  // return res.send("hello ok");
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+  }
+  const response = await vehicle.getUsers(req.body)
+    .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+  return res.send(response);
+});
+
+
+      
+    
+
+  
+
   
 
 

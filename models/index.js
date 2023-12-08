@@ -13,4 +13,5 @@ module.exports = {
     auction: 'auctions',
     carFeature: 'car_features',
     vehicleEnquiry: 'sell_vehicle_enquiries',
+    users: 'users',
   };
