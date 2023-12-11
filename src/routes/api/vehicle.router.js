@@ -398,6 +398,52 @@ router.get('/getUsers',authjwt, async (req, res, next) => {
     .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
   return res.send(response);
 });
+router.post('/getUserbyId',authjwt, async (req, res, next) => {
+  // return res.send("hello ok");
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+  }
+  const response = await vehicle.getUserbyId(req)
+    .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+  return res.send(response);
+});
+
+router.post('/updateUserType',authjwt, async (req, res, next) => {
+  // return res.send("hello ok");
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+  }
+  const response = await vehicle.updateUserType(req)
+    .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+  return res.send(response);
+});
+router.post('/updateUser',authjwt, async (req, res, next) => {
+  // return res.send("hello ok");
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+  }
+  const response = await vehicle.updateUser(req)
+    .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+  return res.send(response);
+});
+router.post('/deleteUser',authjwt, async (req, res, next) => {
+  // return res.send("hello ok");
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+  }
+  const response = await vehicle.deleteUser(req)
+    .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+  return res.send(response);
+});
+
+
+
+
+
 
 
       

@@ -208,7 +208,27 @@ exports.addAuctionVehicle = (req,res) =>
 
           const auctionStartTime=new Date(req.body.auctionStartTime).getTime();
           const auctionEndTime=new Date(req.body.auctionEndTime).getTime();
+          let insuranceValidity;
+          if(req.body.insuranceValidity!=null)
+          {
+            insuranceValidity= new Date(req.body.insuranceValidity).getTime();
+          }
+          else
+          {
+            insuranceValidity=null;
+          }
 
+          let roadTaxValidity;
+          if(req.body.roadTaxValidity!=null)
+          {
+            roadTaxValidity= new Date(req.body.roadTaxValidity).getTime();
+          }
+          else
+          {
+            roadTaxValidity=null;
+          }
+          
+          // console.log(insuranceValidity +" "+roadTaxValidity);
           
           const carDetails ={
             id: insertedId,
@@ -227,7 +247,7 @@ exports.addAuctionVehicle = (req,res) =>
             imagePath: req.body.thumbImage[0].path,
           };
 
-          // console.log(carDetails);
+          // // console.log(carDetails);
           const properties ={
             brand: req.body.brand,
             model: req.body.model,
@@ -243,15 +263,15 @@ exports.addAuctionVehicle = (req,res) =>
             registrationYear: Number(req.body.regYear),
             transmission: req.body.transmission,
             engineCC: Number(req.body.engine),
-            maxPower: Number(req.body.maxPower),
-            mileage: Number(req.body.mileage),
-            maxTorque: Number(req.body.maxTorque),
+            maxPower: req.body.maxPower,
+            mileage: req.body.mileage,
+            maxTorque: req.body.maxTorque,
             noc: req.body.noc,
             manufacturingYear: Number(req.body.mfgYear),
             rtoLocation: req.body.rto,
             inspectionReport: req.body.inspectionReport,
-            insuranceValidity: new Date(req.body.insuranceValidity).getTime(),
-            roadTaxValidity: new Date(req.body.roadTaxValidity).getTime(),
+            insuranceValidity: insuranceValidity,
+            roadTaxValidity: roadTaxValidity,
             inspectionScore: Number(req.body.inspectionScore),
             comfort: req.body.comforts,
             entertainment: req.body.entertainment,
@@ -283,7 +303,7 @@ exports.addAuctionVehicle = (req,res) =>
         latestBid: null,
         startTime:auctionStartTime,
         endTime:auctionEndTime
-      });
+          });
 
       resolve({ success: true, status: status.Ok, msg: 'Data added successfully'});
 
@@ -325,10 +345,30 @@ exports.updateAuctionVehicle = (req,res) =>
 
         const docId =req.body.docId;
 
-        const insuranceValidity =  new Date(req.body.insuranceValidity).getTime();
-        const roadTaxValidity = new Date(req.body.roadTaxValidity).getTime(); 
+        // const insuranceValidity =  new Date(req.body.insuranceValidity).getTime();
+        // const roadTaxValidity = new Date(req.body.roadTaxValidity).getTime(); 
         const auctionStartTime=new Date(req.body.auctionStartTime).getTime(); 
         const auctionEndTime = new Date(req.body.auctionEndTime).getTime(); 
+
+        let insuranceValidity;
+          if(req.body.insuranceValidity!=null)
+          {
+            insuranceValidity= new Date(req.body.insuranceValidity).getTime();
+          }
+          else
+          {
+            insuranceValidity=null;
+          }
+
+          let roadTaxValidity;
+          if(req.body.roadTaxValidity!=null)
+          {
+            roadTaxValidity= new Date(req.body.roadTaxValidity).getTime();
+          }
+          else
+          {
+            roadTaxValidity=null;
+          }
 
           const carDetails ={
             brand: req.body.brand,
@@ -863,6 +903,115 @@ exports.getUsers = (req,res) =>
       reject(error);
     }
 });
+
+exports.getUserbyId = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    const docId=String(req.body.docId);
+    const userType=req.body.userType;
+    try {
+      
+          const snapshot = await db.firestore().collection(collectionName.users).doc(docId).get();
+          const result = snapshot.data();
+          resolve({ success: true, status: status.Ok, msg: 'success',data : result});  
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+exports.updateUserType = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    const docId=String(req.body.docId);
+    const userType=req.body.userType;
+    try {
+      
+          await db.firestore().collection(collectionName.users).doc(docId).update({
+            userTypeStatus: userType,
+          });
+      
+          resolve({ success: true, status: status.Ok, msg: 'success'});  
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+exports.updateUser = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    const docId=String(req.body.docId);
+    const IAddress=[
+      {
+        addressLine1: req.body.addressLine1,
+        addressLine2: req.body.addressLine2,
+        addressLine3: req.body.addressLine3,
+        city: req.body.city,
+        state: req.body.state,
+        country: "India",
+        postalCode: req.body.postalCode,
+      }
+    ];
+    const profile={
+      phone: req.body.phone,
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+    };
+    const IDealerOnboardForm={
+      name: req.body.name,
+      email: req.body.email,
+      shopName: req.body.shopName,
+      shopAddress: req.body.shopAddress,
+      selectedState: req.body.selectedState,
+      selectedCity: req.body.selectedCity,
+      pinCode: req.body.pinCode,
+      panCardNumber: req.body.panCardNumber,
+      addressProofNumber: req.body.addressProofNumber,
+      tradeLicenseNumber: req.body.tradeLicenseNumber,
+      cancelledChequeNumber: req.body.cancelledChequeNumber,
+    };
+    const IShop={
+      name: req.body.shopName,
+      phone: req.body.shopPhone,
+      addresses: IAddress,
+      gstNumber: req.body.gstNumber,
+      // shopImages: string[],
+    };
+
+    try {
+      
+      // console.log(profile);
+          await db.firestore().collection(collectionName.users).doc(docId).update({
+            userTypeStatus: req.body.userType,
+            profile:profile,
+            dealerOnboardFormData:IDealerOnboardForm,
+            shop:IShop,
+          });
+      
+          resolve({ success: true, status: status.Ok, msg: 'success'});  
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+exports.deleteUser = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    const docId=String(req.body.id);
+  
+
+    try {
+      
+      // console.log(profile);
+          await db.firestore().collection(collectionName.users).doc(docId).update({
+            userTypeStatus: 'DELETED',
+          });
+      
+          resolve({ success: true, status: status.Ok, msg: 'success'});  
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+
+
+
 
 
 
