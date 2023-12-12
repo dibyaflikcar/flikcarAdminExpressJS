@@ -203,6 +203,19 @@ router.post('/addAuctionVehicle' ,authjwt,async (req, res, next) => {
         return res.send(response);
       });
 
+      router.post('/getBidList' ,authjwt,async (req, res, next) => { 
+        // console.log(req.body.id);
+          const errors = validationResult(req);
+          if (!errors.isEmpty()) {
+            return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+          }
+          const response = await vehicle.getBidList(req)
+            .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+          return res.send(response);
+        });
+
+      
+
       router.post('/deleteAuctionVehicle' ,authjwt,async (req, res, next) => { 
         // console.log("docID "+req.body.id);
           const errors = validationResult(req);
@@ -439,6 +452,16 @@ router.post('/deleteUser',authjwt, async (req, res, next) => {
     .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
   return res.send(response);
 });
+router.post('/uploadDealerDocumentImage',upload.single('file') ,authjwt,async (req, res, next) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+  }
+  const response = await vehicle.uploadDealerDocumentImage(req)
+    .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+  return res.send(response);
+});
+
 
 
 

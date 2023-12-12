@@ -14,4 +14,5 @@ module.exports = {
     carFeature: 'car_features',
     vehicleEnquiry: 'sell_vehicle_enquiries',
     users: 'users',
+    bidsHistory:'bids_history',
   };

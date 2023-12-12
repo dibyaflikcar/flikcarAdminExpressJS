@@ -183,6 +183,24 @@ exports.getAuctionDetails = (req,res) =>
     }
 });
 
+exports.getBidList = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    const id=String(req.body.id);
+    try {
+        const auctionData = await db.firestore().collection(collectionName.auction).doc(id).get();
+        const auctionResult = auctionData.data();
+
+        const snapshot = await db.firestore().collection(collectionName.bidsHistory).where('auctionId', '=', id).get();
+        const result = snapshot.docs.map(doc => doc.data());
+        resolve({ success: true, status: status.Ok, msg: 'success' ,data : result, auction:auctionResult});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+
+
 exports.deleteAuctionVehicle = (req,res) =>
   new Promise(async (resolve, reject) => {
     const id=String(req.body.id);
@@ -371,6 +389,7 @@ exports.updateAuctionVehicle = (req,res) =>
           }
 
           const carDetails ={
+            id: docId,
             brand: req.body.brand,
             model: req.body.model,
             variant: req.body.variant,
@@ -934,25 +953,39 @@ exports.updateUserType = (req,res) =>
       reject(error);
     }
 });
+
 exports.updateUser = (req,res) =>
   new Promise(async (resolve, reject) => {
     const docId=String(req.body.docId);
-    const IAddress=[
-      {
-        addressLine1: req.body.addressLine1,
-        addressLine2: req.body.addressLine2,
-        addressLine3: req.body.addressLine3,
-        city: req.body.city,
-        state: req.body.state,
-        country: "India",
-        postalCode: req.body.postalCode,
-      }
-    ];
+
+    let IAddress;
+    if(req.body.addressLine1==null && req.body.addressLine2==null && req.body.addressLine3==null && req.body.city==null && req.body.state==null)
+    {
+      IAddress=null;
+    }
+    else
+    {
+      IAddress=[
+        {
+          addressLine1: req.body.addressLine1,
+          addressLine2: req.body.addressLine2,
+          addressLine3: req.body.addressLine3,
+          city: req.body.city,
+          state: req.body.state,
+          country: "India",
+          postalCode: req.body.postalCode,
+        }
+      ];
+    }
+    
     const profile={
       phone: req.body.phone,
       firstName: req.body.firstName,
       lastName: req.body.lastName,
     };
+
+    
+
     const IDealerOnboardForm={
       name: req.body.name,
       email: req.body.email,
@@ -965,7 +998,12 @@ exports.updateUser = (req,res) =>
       addressProofNumber: req.body.addressProofNumber,
       tradeLicenseNumber: req.body.tradeLicenseNumber,
       cancelledChequeNumber: req.body.cancelledChequeNumber,
+      docsImagePaths: req.body.allImage,
     };
+
+    // console.log(IDealerOnboardForm);
+    // resolve({ success: true, status: status.Ok, msg: 'success'});
+
     const IShop={
       name: req.body.shopName,
       phone: req.body.shopPhone,
@@ -976,7 +1014,7 @@ exports.updateUser = (req,res) =>
 
     try {
       
-      // console.log(profile);
+      // console.log(req.body.firstName);
           await db.firestore().collection(collectionName.users).doc(docId).update({
             userTypeStatus: req.body.userType,
             profile:profile,
@@ -1008,6 +1046,46 @@ exports.deleteUser = (req,res) =>
       reject(error);
     }
 });
+exports.uploadDealerDocumentImage = (req,res) =>
+  new Promise(async (resolve, reject) => {
+
+    try {
+
+          const randomId= new Date().getTime();
+          const image = req.file;
+          // console.log(image);
+
+        // Upload image to Firebase Cloud Storage
+        const storageRef = bucket.file(randomId+"_"+image.originalname);
+        const blobStream = storageRef.createWriteStream();
+        blobStream.on('finish', async () => {
+          // Generate download URL
+          const downloadUrl = await storageRef.getSignedUrl({
+            action: 'read',
+            expires: '01-01-2100', // Adjust the expiration date as needed
+          });
+          // console.log(downloadUrl[0]);
+          const fileUrl=downloadUrl[0];
+          // let images = [];
+          //   images.push({
+          //     path: fileUrl,
+          //     type:"EXT"
+          //   });
+
+            let images = {
+              type:req.body.type,
+              url: fileUrl
+            };
+            resolve({ success: true, status: status.Ok, msg: 'success', data:images});
+        });
+
+        blobStream.end(image.buffer);
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
 
 
 
