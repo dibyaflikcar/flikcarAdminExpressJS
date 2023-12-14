@@ -187,8 +187,6 @@ router.post('/addAuctionVehicle' ,authjwt,async (req, res, next) => {
       return res.send(response);
     });
 
-  
-
 
   router.post('/getAuctionCarDetails' ,authjwt,async (req, res, next) => { 
     // console.log(req.body.id);
@@ -224,7 +222,6 @@ router.post('/addAuctionVehicle' ,authjwt,async (req, res, next) => {
         });
 
       
-
       router.post('/deleteAuctionVehicle' ,authjwt,async (req, res, next) => { 
         // console.log("docID "+req.body.id);
           const errors = validationResult(req);
@@ -298,6 +295,18 @@ router.post('/uploadAuctionImage',upload.single('file') ,authjwt,async (req, res
         .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
       return res.send(response);
     });
+
+    router.post('/uploadAuctionVideo1',upload.single('file') ,authjwt,async (req, res, next) => {
+      // console.log(req.file);
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+      }
+      const response = await vehicle.uploadAuctionVideo1(req)
+        .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+      return res.send(response);
+    });
+    
 
 // vehicle enquiry start here
 router.get('/getVehicleEnquiry',authjwt, async (req, res, next) => {

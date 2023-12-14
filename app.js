@@ -8,10 +8,12 @@ const apiRouter = require('./src/routes/index');
 const app = express();
 const PORT = process.env.PORT;
 app.use(cors());
-app.use(bodyParser.json());
-// parse requests of content-type: application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: true }));
 
+// app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 
 
 app.use('/api/', apiRouter);

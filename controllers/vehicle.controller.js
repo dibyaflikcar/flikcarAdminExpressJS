@@ -321,6 +321,7 @@ exports.addAuctionVehicle = (req,res) =>
             id: insertedId,
             carPrice: Number(req.body.carPrice),
             images: req.body.allCarImage,
+            videos:req.body.allCarVideo,
             status: "INACTIVE",
             properties: properties,
             uploadedBy: "admin",
@@ -334,7 +335,8 @@ exports.addAuctionVehicle = (req,res) =>
         isSoldOut: false,
         latestBid: null,
         startTime:auctionStartTime,
-        endTime:auctionEndTime
+        endTime:auctionEndTime,
+        oneClickBuyPrice:req.body.oneClickBuyPrice
           });
 
       resolve({ success: true, status: status.Ok, msg: 'Data added successfully'});
@@ -458,6 +460,7 @@ exports.updateAuctionVehicle = (req,res) =>
           await db.firestore().collection(collectionName.AuctionVehicle).doc(docId).update({
             carPrice: req.body.carPrice,
             images: req.body.allCarImage,
+            videos:req.body.allCarVideo,
             // status: "INACTIVE",
             properties: properties,
           });
@@ -467,7 +470,8 @@ exports.updateAuctionVehicle = (req,res) =>
             startPrice: Number(req.body.carPrice),
             isSoldOut: req.body.carsoldStatus,
             startTime:auctionStartTime,
-            endTime:auctionEndTime
+            endTime:auctionEndTime,
+            oneClickBuyPrice:req.body.oneClickBuyPrice
           });
          
 
@@ -722,6 +726,47 @@ exports.uploadAuctionImage6 = (req,res) =>
       reject(error);
     }
 });
+
+exports.uploadAuctionVideo1 = (req,res) =>
+  new Promise(async (resolve, reject) => {
+
+    try {
+
+          const randomId= new Date().getTime();
+          const image = req.file;
+  
+
+        // Upload image to Firebase Cloud Storage
+        const storageRef = bucket.file(randomId+"_"+image.originalname);
+        const blobStream = storageRef.createWriteStream();
+        blobStream.on('finish', async () => {
+          // Generate download URL
+          const downloadUrl = await storageRef.getSignedUrl({
+            action: 'read',
+            expires: '01-01-2100', // Adjust the expiration date as needed
+          });
+          // console.log(downloadUrl[0]);
+          const fileUrl=downloadUrl[0];
+          // let images = [];
+          //   images.push({
+          //     path: fileUrl,
+          //     type:"EXT"
+          //   });
+
+            let videos = {
+              path: fileUrl,
+              type:"ENGINE"
+            };
+            resolve({ success: true, status: status.Ok, msg: 'success', data:videos});
+        });
+
+        blobStream.end(image.buffer);
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
 
 
 // vehicle enquiry start here
@@ -1144,7 +1189,7 @@ exports.updateUser = (req,res) =>
 
     try {
       
-      // console.log(req.body.firstName);
+      // console.log(IDealerOnboardForm);
           await db.firestore().collection(collectionName.users).doc(docId).update({
             userTypeStatus: req.body.userType,
             profile:profile,
