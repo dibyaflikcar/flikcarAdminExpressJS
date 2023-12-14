@@ -15,4 +15,5 @@ module.exports = {
     vehicleEnquiry: 'sell_vehicle_enquiries',
     users: 'users',
     bidsHistory:'bids_history',
+    rtoLocation:'rtoLocations',
   };

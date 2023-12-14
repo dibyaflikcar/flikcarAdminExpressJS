@@ -87,6 +87,18 @@ router.get('/seat',authjwt, async (req, res, next) => {
   return res.send(response);
 });
 
+router.get('/getRto',authjwt, async (req, res, next) => {
+  // return res.send("hello ok");
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+  }
+  const response = await vehicle.getRto(req)
+    .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+  return res.send(response);
+});
+
+
 router.get('/ownerType',authjwt, async (req, res, next) => {
   // return res.send("hello ok");
   const errors = validationResult(req);
@@ -119,9 +131,6 @@ router.get('/auction',authjwt, async (req, res, next) => {
     .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
   return res.send(response);
 });
-
-
-
 
 
 router.get('/getAuctionVehicle',authjwt, async (req, res, next) => {
@@ -400,6 +409,31 @@ router.post('/getBrandwithID' ,authjwt,async (req, res, next) => {
           return res.send(response);
         });
 
+
+// variant start here
+router.post('/addVariant' ,authjwt,async (req, res, next) => { 
+  // console.log("docID "+req.body.id);
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+    }
+    const response = await vehicle.addVariant(req)
+      .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+    return res.send(response);
+  });
+  router.post('/deleteVariant' ,authjwt,async (req, res, next) => { 
+    // console.log("docID "+req.body.id);
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+      }
+      const response = await vehicle.deleteVariant(req)
+        .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+      return res.send(response);
+    });
+  
+
+
 // user start here
 router.get('/getUsers',authjwt, async (req, res, next) => {
   // return res.send("hello ok");
@@ -461,6 +495,96 @@ router.post('/uploadDealerDocumentImage',upload.single('file') ,authjwt,async (r
     .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
   return res.send(response);
 });
+
+// color start here
+router.get('/getColorList',authjwt, async (req, res, next) => {
+  // return res.send("hello ok");
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+  }
+  const response = await vehicle.getColorList(req)
+    .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+  return res.send(response);
+});
+router.post('/addColor',authjwt, async (req, res, next) => {
+  // return res.send("hello ok");
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+  }
+  const response = await vehicle.addColor(req)
+    .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+  return res.send(response);
+});
+router.post('/updateColor',authjwt, async (req, res, next) => {
+  // return res.send("hello ok");
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+  }
+  const response = await vehicle.updateColor(req)
+    .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+  return res.send(response);
+});
+router.post('/deleteColor',authjwt, async (req, res, next) => {
+  // return res.send("hello ok");
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+  }
+  const response = await vehicle.deleteColor(req)
+    .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+  return res.send(response);
+});
+
+// RTO start here
+router.get('/getRtoList',authjwt, async (req, res, next) => {
+  // return res.send("hello ok");
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+  }
+  const response = await vehicle.getRtoList(req)
+    .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+  return res.send(response);
+});
+router.post('/addRto',authjwt, async (req, res, next) => {
+  // return res.send("hello ok");
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+  }
+  const response = await vehicle.addRto(req)
+    .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+  return res.send(response);
+});
+router.post('/updateRto',authjwt, async (req, res, next) => {
+  // return res.send("hello ok");
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+  }
+  const response = await vehicle.updateRto(req)
+    .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+  return res.send(response);
+});
+router.post('/deleteRto',authjwt, async (req, res, next) => {
+  // return res.send("hello ok");
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+  }
+  const response = await vehicle.deleteRto(req)
+    .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+  return res.send(response);
+});
+
+
+
+
+
+
 
 
 

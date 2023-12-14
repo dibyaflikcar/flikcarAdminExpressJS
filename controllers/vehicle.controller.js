@@ -119,6 +119,20 @@ exports.color = (req,res) =>
     }
 });
 
+exports.getRto = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    try {
+        const snapshot = await db.firestore().collection(collectionName.rtoLocation).get();
+        const result = snapshot.docs.map(doc => doc.data());
+        resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+
+
 exports.fueltype = (req,res) =>
   new Promise(async (resolve, reject) => {
     try {
@@ -258,7 +272,7 @@ exports.addAuctionVehicle = (req,res) =>
             color: req.body.color,
             seat: Number(req.body.seat),
             ownerType: req.body.ownerType,
-            city: "Kolkata",
+            city: req.body.city,
             transmission: req.body.transmission,
             kmsDriven: Number(req.body.kmsDriven),
             registrationYear: Number(req.body.regYear),
@@ -276,7 +290,7 @@ exports.addAuctionVehicle = (req,res) =>
             seat: Number(req.body.seat),
             ownerType: req.body.ownerType,
             carDescription: req.body.description,
-            city: "Kolkata",
+            city: req.body.city,
             kmsDriven: Number(req.body.kmsDriven),
             registrationYear: Number(req.body.regYear),
             transmission: req.body.transmission,
@@ -398,7 +412,7 @@ exports.updateAuctionVehicle = (req,res) =>
             color: req.body.color,
             seat: req.body.seat,
             ownerType: req.body.ownerType,
-            city: "Kolkata",
+            city: req.body.city,
             transmission: req.body.transmission,
             kmsDriven: req.body.kmsDriven,
             registrationYear: req.body.regYear,
@@ -417,7 +431,7 @@ exports.updateAuctionVehicle = (req,res) =>
             seat: req.body.seat,
             ownerType: req.body.ownerType,
             carDescription: req.body.description,
-            city: "Kolkata",
+            city: req.body.city,
             kmsDriven: req.body.kmsDriven,
             registrationYear: req.body.regYear,
             transmission: req.body.transmission,
@@ -821,31 +835,51 @@ exports.getBrandwithID = (req,res) =>
     const docId=String(req.body.docId);
     try {
       
+      // console.log(docId);
       const snapshot=await db.firestore().collection(collectionName.makeAndModel).doc(docId).get();
       const result = snapshot.data();
-      // console.log(result.models);
+      console.log(result.models);
       let myArray = result.models;
-      
-      const valueToCheck = req.body.model;
-      const exists = myArray.some(obj => Object.values(obj).includes(valueToCheck));
-      if(exists==true)
+
+      if(myArray!=null)
       {
-        resolve({ success: false, status: status.Found, msg: 'error'});
+          const valueToCheck = req.body.model;
+          const exists = myArray.some(obj => Object.values(obj).includes(valueToCheck));
+          if(exists==true)
+          {
+            resolve({ success: false, status: status.Found, msg: 'error'});
+          }
+          else
+          {
+              const newItem = {
+                name:req.body.model,
+                variants:null,
+              }; 
+              myArray.push(newItem);
+
+              await db.firestore().collection(collectionName.makeAndModel).doc(docId).update({
+                models: myArray,
+              });
+          
+              resolve({ success: true, status: status.Ok, msg: 'success'});
+          }
       }
       else
       {
-          const newItem = {
-            name:req.body.model,
-            variants:null,
-          }; 
-          myArray.push(newItem);
+        const newItem = {
+          name:req.body.model,
+          variants:null,
+        }; 
+        myArray.push(newItem);
 
-          await db.firestore().collection(collectionName.makeAndModel).doc(docId).update({
-            models: myArray,
-          });
-      
-          resolve({ success: true, status: status.Ok, msg: 'success'});
+        await db.firestore().collection(collectionName.makeAndModel).doc(docId).update({
+          models: myArray,
+        });
+    
+        resolve({ success: true, status: status.Ok, msg: 'success'});
       }
+      
+      
      
       
       
@@ -909,6 +943,102 @@ exports.deleteModel = (req,res) =>
       reject(error);
     }
 });
+
+// variant start here
+exports.addVariant = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    const docId=String(req.body.docId);
+    const modelKey=req.body.modelKey;
+    const variant=String(req.body.variant);
+    // const indexId=0;
+    try {
+      
+      // console.log(docId+" "+modelKey+" "+variant);
+      const snapshot=await db.firestore().collection(collectionName.makeAndModel).doc(docId).get();
+      const result = snapshot.data();
+      console.log(result.models[modelKey].variants);
+      if(result.models[modelKey].variants!=null)
+      {
+        let modelArray = result.models;
+        let variantArray = result.models[modelKey].variants;
+        variantArray.push(variant);
+
+        if (modelKey >= 0 && modelKey < modelArray.length) {
+          // Update the value in the specific object at the given index
+          modelArray[modelKey].variants = variantArray;
+        }
+
+        // console.log(modelArray);
+          await db.firestore().collection(collectionName.makeAndModel).doc(docId).update({
+            models: modelArray,
+          });
+      }
+      else
+      {
+        let modelArray = result.models;
+        let variantArray = [variant];
+        
+
+        if (modelKey >= 0 && modelKey < modelArray.length) {
+          // Update the value in the specific object at the given index
+          modelArray[modelKey].variants = variantArray;
+        }
+
+        // console.log(modelArray);
+          await db.firestore().collection(collectionName.makeAndModel).doc(docId).update({
+            models: modelArray,
+          });
+      }
+      
+    
+        resolve({ success: true, status: status.Ok, msg: 'success'});
+      
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+exports.deleteVariant = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    const docId=String(req.body.docId);
+    const modelKey=req.body.modelKey;
+    const variantKey=String(req.body.variantKey);
+    // const indexId=0;
+    try {
+      
+      // console.log(docId);
+      const snapshot=await db.firestore().collection(collectionName.makeAndModel).doc(docId).get();
+      const result = snapshot.data();
+      // console.log(result.models[modelKey].variants);
+      let modelArray = result.models;
+      let variantArray = result.models[modelKey].variants;
+      // variantArray.push(variant);
+
+      
+
+      if (variantKey >= 0 && variantKey < variantArray.length) {
+        variantArray.splice(variantKey, 1);
+      }
+
+      if (modelKey >= 0 && modelKey < modelArray.length) {
+        modelArray[modelKey].variants = variantArray;
+      }
+
+      // console.log(modelArray);
+        await db.firestore().collection(collectionName.makeAndModel).doc(docId).update({
+          models: modelArray,
+        });
+    
+        resolve({ success: true, status: status.Ok, msg: 'success'});
+      
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+
 
 // user start here
 exports.getUsers = (req,res) =>
@@ -1085,6 +1215,157 @@ exports.uploadDealerDocumentImage = (req,res) =>
       reject(error);
     }
 });
+
+
+// color start here
+exports.getColorList = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    try {
+        const snapshot = await db.firestore().collection(collectionName.color).get();
+        // const result = snapshot.docs.map(doc => doc.data());
+        const result = [];
+        snapshot.forEach((doc) => {
+          result.push({
+            id: doc.id,
+            data: doc.data(),
+          });
+        });
+        resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+exports.addColor = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    
+    try {
+        const randomId= new Date().getTime();
+        const insertedId =String(randomId);
+        const createdAt =randomId;
+        const updatedAt =randomId;
+
+      await db.firestore().collection(collectionName.color).doc(insertedId).set({
+        id: insertedId,
+        name: req.body.newColorName,
+        code: req.body.newColorCode,
+        createdAt:createdAt,
+        updatedAt:updatedAt,
+        status:"ACTIVE",
+      });
+        resolve({ success: true, status: status.Ok, msg: 'success'});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+exports.updateColor = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    
+    try {
+        const updatedAt= new Date().getTime();
+        const id=String(req.body.id);
+        // console.log(req.body.id+ " "+req.body.newColorName+" "+);
+
+        // console.log(req.body.id +" "+req.body.editColorName+" "+req.body.editColorCode);
+      await db.firestore().collection(collectionName.color).doc(id).update({
+        name: req.body.editColorName,
+        code: req.body.editColorCode,
+        updatedAt:updatedAt,
+      });
+        resolve({ success: true, status: status.Ok, msg: 'success'});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+exports.deleteColor = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    
+    try {
+        const id=String(req.body.id);
+        await db.firestore().collection(collectionName.color).doc(id).delete();
+        resolve({ success: true, status: status.Ok, msg: 'success'});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+// RTO start here
+exports.getRtoList = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    try {
+        const snapshot = await db.firestore().collection(collectionName.rtoLocation).get();
+        // const result = snapshot.docs.map(doc => doc.data());
+        const result = [];
+        snapshot.forEach((doc) => {
+          result.push({
+            id: doc.id,
+            data: doc.data(),
+          });
+        });
+        resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+exports.addRto = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    
+    try {
+        const randomId= new Date().getTime();
+        const insertedId =String(randomId);
+        
+
+      await db.firestore().collection(collectionName.rtoLocation).doc(insertedId).set({
+        id: insertedId,
+        rtoName: req.body.newRtoName,
+        rtoCode: req.body.newRtoCode,
+      });
+        resolve({ success: true, status: status.Ok, msg: 'success'});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+exports.updateRto = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    
+    try {
+        const updatedAt= new Date().getTime();
+        const id=String(req.body.id);
+      await db.firestore().collection(collectionName.rtoLocation).doc(id).update({
+        rtoName: req.body.editRtoName,
+        rtoCode: req.body.editRtoCode,
+      });
+        resolve({ success: true, status: status.Ok, msg: 'success'});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+exports.deleteRto = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    
+    try {
+        const id=String(req.body.id);
+        await db.firestore().collection(collectionName.rtoLocation).doc(id).delete();
+        resolve({ success: true, status: status.Ok, msg: 'success'});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+
+
+
+
+
 
 
 
