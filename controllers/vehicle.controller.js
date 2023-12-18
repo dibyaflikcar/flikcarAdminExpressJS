@@ -755,7 +755,43 @@ exports.uploadAuctionVideo1 = (req,res) =>
 
             let videos = {
               path: fileUrl,
-              type:"ENGINE"
+              type:"ENGINE",
+              thumb:'https://firebasestorage.googleapis.com/v0/b/flikcar-bac6e.appspot.com/o/001.jpg?alt=media&token=58caa43d-3141-4969-a8ed-d10c51ea8cac',
+            };
+            resolve({ success: true, status: status.Ok, msg: 'success', data:videos});
+        });
+
+        blobStream.end(image.buffer);
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+exports.uploadAuctionVideo2 = (req,res) =>
+  new Promise(async (resolve, reject) => {
+
+    try {
+
+          const randomId= new Date().getTime();
+          const image = req.file;
+  
+
+        // Upload image to Firebase Cloud Storage
+        const storageRef = bucket.file(randomId+"_"+image.originalname);
+        const blobStream = storageRef.createWriteStream();
+        blobStream.on('finish', async () => {
+          // Generate download URL
+          const downloadUrl = await storageRef.getSignedUrl({
+            action: 'read',
+            expires: '01-01-2100', // Adjust the expiration date as needed
+          });
+          // console.log(downloadUrl[0]);
+          const fileUrl=downloadUrl[0];
+
+            let videos = {
+              path: fileUrl,
+              type:"SILENCER",
+              thumb:'https://firebasestorage.googleapis.com/v0/b/flikcar-bac6e.appspot.com/o/002.jpg?alt=media&token=d47b010c-7b7f-4b9b-ab25-e99e1c31db53',
             };
             resolve({ success: true, status: status.Ok, msg: 'success', data:videos});
         });
@@ -1249,7 +1285,7 @@ exports.uploadDealerDocumentImage = (req,res) =>
 
             let images = {
               type:req.body.type,
-              url: fileUrl
+              path: fileUrl
             };
             resolve({ success: true, status: status.Ok, msg: 'success', data:images});
         });
@@ -1400,6 +1436,47 @@ exports.deleteRto = (req,res) =>
         const id=String(req.body.id);
         await db.firestore().collection(collectionName.rtoLocation).doc(id).delete();
         resolve({ success: true, status: status.Ok, msg: 'success'});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+// blog part
+exports.uploadBlogImage = (req,res) =>
+  new Promise(async (resolve, reject) => {
+
+    try {
+
+          const randomId= new Date().getTime();
+          const image = req.file;
+          // console.log(image);
+
+        // Upload image to Firebase Cloud Storage
+        const storageRef = bucket.file(randomId+"_"+image.originalname);
+        const blobStream = storageRef.createWriteStream();
+        blobStream.on('finish', async () => {
+          // Generate download URL
+          const downloadUrl = await storageRef.getSignedUrl({
+            action: 'read',
+            expires: '01-01-2100', // Adjust the expiration date as needed
+          });
+          // console.log(downloadUrl[0]);
+          const fileUrl=downloadUrl[0];
+          // let images = [];
+          //   images.push({
+          //     path: fileUrl,
+          //     type:"THUMB"
+          //   });
+
+          let images = {
+              path: fileUrl,
+              type:"THUMB"
+            };
+            resolve({ success: true, status: status.Ok, msg: 'success', data:images});
+        });
+
+        blobStream.end(image.buffer);
       
     } catch (error) {
       reject(error);

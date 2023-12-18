@@ -306,6 +306,17 @@ router.post('/uploadAuctionImage',upload.single('file') ,authjwt,async (req, res
         .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
       return res.send(response);
     });
+
+    router.post('/uploadAuctionVideo2',upload.single('file') ,authjwt,async (req, res, next) => {
+      // console.log(req.file);
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+      }
+      const response = await vehicle.uploadAuctionVideo2(req)
+        .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+      return res.send(response);
+    });
     
 
 // vehicle enquiry start here
@@ -588,6 +599,23 @@ router.post('/deleteRto',authjwt, async (req, res, next) => {
     .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
   return res.send(response);
 });
+
+
+// blog part
+router.post('/uploadBlogImage',upload.single('file') ,authjwt,async (req, res, next) => {
+
+  // const ThumbnailPhotos = req.file;
+  // console.log(ThumbnailPhotos);
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+    }
+    const response = await vehicle.uploadBlogImage(req)
+      .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+    return res.send(response);
+  });
+
+
 
 
 

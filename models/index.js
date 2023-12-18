@@ -16,4 +16,5 @@ module.exports = {
     users: 'users',
     bidsHistory:'bids_history',
     rtoLocation:'rtoLocations',
+    blog:'blogs',
   };
