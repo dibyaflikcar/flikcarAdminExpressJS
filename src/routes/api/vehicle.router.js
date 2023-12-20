@@ -18,6 +18,18 @@ const upload = multer({ storage: storage });
 const bucket = db.storage().bucket();
 
 
+router.get('/getInspectorList',authjwt, async (req, res, next) => {
+  // return res.send("hello ok");
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+  }
+  const response = await vehicle.getInspectorList(req)
+    .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+  return res.send(response);
+});
+
+
 router.get('/makeAndModel',authjwt, async (req, res, next) => {
   // return res.send("hello ok");
   const errors = validationResult(req);
@@ -232,6 +244,21 @@ router.post('/addAuctionVehicle' ,authjwt,async (req, res, next) => {
             .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
           return res.send(response);
         });
+
+        
+
+        router.post('/uploadInspectionImage',upload.single('file') ,authjwt,async (req, res, next) => {
+
+          // const ThumbnailPhotos = req.file;
+          // console.log(ThumbnailPhotos);
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+              return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+            }
+            const response = await vehicle.uploadInspectionImage(req)
+              .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+            return res.send(response);
+          });
 
 router.post('/uploadAuctionImage',upload.single('file') ,authjwt,async (req, res, next) => {
 

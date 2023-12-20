@@ -16,6 +16,18 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const bucket = db.storage().bucket();
 
+
+exports.getInspectorList = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    try {
+        const snapshot = await db.firestore().collection(collectionName.admin).where('type','=','inspector').get();
+        const result = snapshot.docs.map(doc => doc.data());
+        resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
+    } catch (error) {
+      reject(error);
+    }
+  });
+
 exports.makeAndModel = (req,res) =>
   new Promise(async (resolve, reject) => {
     try {
@@ -331,7 +343,7 @@ exports.addAuctionVehicle = (req,res) =>
           await db.firestore().collection(collectionName.auction).doc(insertedId).set({
         id: insertedId,
         carDetails: carDetails,
-        startPrice: Number(req.body.carPrice),
+        startPrice: 0,
         isSoldOut: false,
         latestBid: null,
         startTime:auctionStartTime,
@@ -458,7 +470,7 @@ exports.updateAuctionVehicle = (req,res) =>
           // console.log(properties);
 
           await db.firestore().collection(collectionName.AuctionVehicle).doc(docId).update({
-            carPrice: req.body.carPrice,
+            carPrice: Number(req.body.carPrice),
             images: req.body.allCarImage,
             videos:req.body.allCarVideo,
             // status: "INACTIVE",
@@ -467,7 +479,7 @@ exports.updateAuctionVehicle = (req,res) =>
 
           await db.firestore().collection(collectionName.auction).doc(docId).update({
             carDetails: carDetails,
-            startPrice: Number(req.body.carPrice),
+            // startPrice: Number(req.body.carPrice),
             isSoldOut: req.body.carsoldStatus,
             startTime:auctionStartTime,
             endTime:auctionEndTime,
@@ -486,6 +498,37 @@ exports.updateAuctionVehicle = (req,res) =>
     }
 });
 
+
+exports.uploadInspectionImage = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    try {
+          const randomId= new Date().getTime();
+          const image = req.file;
+          // console.log(image);
+
+        // Upload image to Firebase Cloud Storage
+        const storageRef = bucket.file(randomId+"_"+image.originalname);
+        const blobStream = storageRef.createWriteStream();
+        blobStream.on('finish', async () => {
+          // Generate download URL
+          const downloadUrl = await storageRef.getSignedUrl({
+            action: 'read',
+            expires: '01-01-2100', // Adjust the expiration date as needed
+          });
+          const fileUrl=downloadUrl[0];
+
+          let images = {
+              path: fileUrl,
+            };
+            resolve({ success: true, status: status.Ok, msg: 'success', data:images});
+        });
+
+        blobStream.end(image.buffer);
+      
+    } catch (error) {
+      reject(error);
+    }
+});
 
 exports.uploadAuctionImage = (req,res) =>
   new Promise(async (resolve, reject) => {
