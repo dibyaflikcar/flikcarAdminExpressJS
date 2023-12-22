@@ -770,6 +770,78 @@ exports.uploadAuctionImage6 = (req,res) =>
     }
 });
 
+exports.uploadAuctionImage7 = (req,res) =>
+  new Promise(async (resolve, reject) => {
+
+    try {
+
+          const randomId= new Date().getTime();
+          const image = req.file;
+          // console.log(image);
+
+        // Upload image to Firebase Cloud Storage
+        const storageRef = bucket.file(randomId+"_"+image.originalname);
+        const blobStream = storageRef.createWriteStream();
+        blobStream.on('finish', async () => {
+          // Generate download URL
+          const downloadUrl = await storageRef.getSignedUrl({
+            action: 'read',
+            expires: '01-01-2100', // Adjust the expiration date as needed
+          });
+          // console.log(downloadUrl[0]);
+          const fileUrl=downloadUrl[0];
+
+            let images = {
+              path: fileUrl,
+              type:"OTHERS"
+            };
+            resolve({ success: true, status: status.Ok, msg: 'success', data:images});
+        });
+
+        blobStream.end(image.buffer);
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+exports.uploadAuctionImage8 = (req,res) =>
+  new Promise(async (resolve, reject) => {
+
+    try {
+
+          const randomId= new Date().getTime();
+          const image = req.file;
+          // console.log(image);
+
+        // Upload image to Firebase Cloud Storage
+        const storageRef = bucket.file(randomId+"_"+image.originalname);
+        const blobStream = storageRef.createWriteStream();
+        blobStream.on('finish', async () => {
+          // Generate download URL
+          const downloadUrl = await storageRef.getSignedUrl({
+            action: 'read',
+            expires: '01-01-2100', // Adjust the expiration date as needed
+          });
+          // console.log(downloadUrl[0]);
+          const fileUrl=downloadUrl[0];
+
+            let images = {
+              path: fileUrl,
+              type:"OTHERS"
+            };
+            resolve({ success: true, status: status.Ok, msg: 'success', data:images});
+        });
+
+        blobStream.end(image.buffer);
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+
+
 exports.uploadAuctionVideo1 = (req,res) =>
   new Promise(async (resolve, reject) => {
 
@@ -1526,6 +1598,283 @@ exports.uploadBlogImage = (req,res) =>
     }
 });
 
+// inspection car
+exports.addInspectionVehicle = (req,res) =>
+  new Promise(async (resolve, reject) => {
+ 
+    try {
+
+          const randomId= new Date().getTime();
+          const insertedId =String(randomId);
+          const uploadedAt =randomId;
+
+         
+          let insuranceValidity;
+          if(req.body.insuranceValidity!=null)
+          {
+            insuranceValidity= new Date(req.body.insuranceValidity).getTime();
+          }
+          else
+          {
+            insuranceValidity=null;
+          }
+
+          let roadTaxValidity;
+          if(req.body.roadTaxValidUpto!=null)
+          {
+            roadTaxValidity= new Date(req.body.roadTaxValidUpto).getTime();
+          }
+          else
+          {
+            roadTaxValidity=null;
+          }
+
+        
+
+          let regDate;
+          if(req.body.regDate!=null)
+          {
+            regDate= new Date(req.body.regDate).getTime();
+          }
+          else
+          {
+            regDate=null;
+          }
+
+          let fitnessUpto;
+          if(req.body.fitnessUpto!=null)
+          {
+            fitnessUpto= new Date(req.body.fitnessUpto).getTime();
+          }
+          else
+          {
+            fitnessUpto=null;
+          }
+
+          let rtoNocIssueDate;
+          if(req.body.rtoNocIssueDate!=null)
+          {
+            rtoNocIssueDate= new Date(req.body.rtoNocIssueDate).getTime();
+          }
+          else
+          {
+            rtoNocIssueDate=null;
+          }
+          
+        
+          
+         const basicDocuments = {
+            appointmentId: insertedId,
+            custContactNo: req.body.custContactNo,
+            city: req.body.city,
+            regType: req.body.regType,
+            regNo: req.body.regNo,
+            rcAvailablilty: req.body.rcAvailability,
+            rcAvailabilityImages: req.body.rcAvailabilityImages,
+            rcCondition: req.body.rcCondition,
+            regDate: regDate,
+            fittnessUpto: fitnessUpto,
+            tobeScraped: req.body.tobeScraped,
+            regState: req.body.regState,
+            rtoLocation: req.body.rto,
+            ownerSerialNo: req.body.ownerSerialNo,
+            brand: req.body.brand,
+            model: req.body.model,
+            variant: req.body.variant,
+            engineNo: req.body.engineNo,
+            chassisNo: req.body.chassisNo,
+            chassisImages:req.body.chassisImages,
+            regOwnerName: req.body.regOwnerName,
+            mfgMonth: req.body.mfgMonth,
+            manufacturingYear: req.body.mfgYear,
+            fuelType: req.body.fuelType,
+            cc: Number(req.body.cc),
+            hypoDetails: req.body.hypoDetails,
+            hypoImages: req.body.hypoImages,
+            seat: req.body.seat,
+            missmatchRC: req.body.missmatchRC,
+            roadTaxValidity: roadTaxValidity,
+            roadTaxValidityImages: req.body.roadTaxValidityImages,
+            roadTax: req.body.roadTax,
+            insurance: req.body.insurance,
+            insuranceImages: req.body.insuranceImages,
+            insuranceValidity: insuranceValidity,
+            noClaimBonus: req.body.noClaimBonus,
+            missmatchInsurance: req.body.missmatchInsurance,
+            duplicateKey: req.body.duplicateKey,
+            duplicateKeyImages: req.body.duplicateKeyImages,
+            rtoNoc: req.body.rtoNoc,
+            rtoNocImages: req.body.rtoNocImages,
+            rtoNocIssueDate: rtoNocIssueDate,
+            commentsOnBasic: req.body.commentsOnBasic,
+            registrationYear: req.body.regYear,
+            bodyType: req.body.bodyType,
+            transmission: req.body.transmission,
+            ownerType: req.body.ownerType,
+            color: req.body.color,
+            kmsDriven: req.body.kmsDriven,
+            carDescription: req.body.description,
+            mileage: req.body.mileage,
+            maxPower: req.body.maxPower,
+            maxTorque: req.body.maxTorque,
+            inspectionReport: req.body.inspectionReport,
+            inspectionScore: Number(req.body.inspectionScore),
+            comfort: req.body.comforts,
+            safety: req.body.safety,
+            interior: req.body.interior,
+            exterior: req.body.exterior,
+            entertainment: req.body.entertainment,
+            imagePath: req.body.thumbImage[0].path
+          };
+
+          
+
+          const exteriorDetails = {
+            bonnet: req.body.bonnet,
+            upperCrossMember: req.body.upperCrossMember,
+            lowerCrossMember: req.body.lowerCrossMember,
+            radiatorSupport: req.body.radiatorSupport,
+            headlightSupport: req.body.headlightSupport,
+            lhsApron: req.body.lhsApron,
+            rhsApron: req.body.rhsApron,
+            frontWindshield: req.body.frontWindshield,
+            firewall: req.body.firewall,
+            cowlTop: req.body.cowlTop,
+            roof: req.body.roof,
+            frontBumper: req.body.frontBumper,
+            lhsHeadLamp: req.body.lhsHeadlamp,
+            rhsHeadLamp: req.body.rhsHeadlamp,
+            lhsFogLamp: req.body.lhsFoglamp,
+            rhsFogLamp: req.body.rhsFoglamp,
+            lhsFender: req.body.lhsFender,
+            lhsFrontAlloy: req.body.lhsFrontAlloy,
+            lhsFrontTyre: req.body.lhsFrontTyre,
+            lhsOrvm: req.body.lhsOrvm,
+            lhsAPillar: req.body.lhsAPillar,
+            lhsFrontDoor: req.body.lhsFrontDoor,
+            lhsBPillar: req.body.lhsBPillar,
+            lhsRearDoor: req.body.lhsRearDoor,
+            lhsCPillar: req.body.lhsCPillar,
+            lhsRunningBoard: req.body.lhsRunningBoard,
+            lhsRearAlloy: req.body.lhsRearAlloy,
+            lhsRearTyre: req.body.lhsRearTyre,
+            lhsQuarterPanel: req.body.lhsQuarterPanel,
+            rearBumper: req.body.rearBumper,
+            lhsTailLamp: req.body.lhsTailLamp,
+            rhsTailLamp: req.body.rhsTailLamp,
+            rearWindshield: req.body.rearWindshield,
+            bootDoor: req.body.bootDoor,
+            spareTyre: req.body.spareTyre,
+            bootFloor: req.body.bootFloor,
+            rhsQuarterPanel: req.body.rhsQuarterPanel,
+            rhsRearAlloy: req.body.rhsRearAlloy,
+            rhsRearTyre: req.body.rhsRearTyre,
+            rhsCPillar: req.body.rhsCPillar,
+            rhsRearDoor: req.body.rhsRearDoor,
+            rhsBPillar: req.body.rhsBPillar,
+            rhsFrontDoor: req.body.rhsFrontDoor,
+            rhsAPillar: req.body.rhsAPillar,
+            rhsRunningBoard: req.body.rhsRunningBoard,
+            rhsFrontAlloy: req.body.rhsFrontAlloy,
+            rhsFrontTyre: req.body.rhsFrontTyre,
+            rhsOrvm: req.body.rhsOrvm,
+            rhsFender: req.body.rhsFender,
+            commentsOnExterior: req.body.commentsOnExterior,
+            exteriorImages: req.body.exteriorImages,
+            dentImages: req.body.dentImages,
+            tyreImages: req.body.tyreImages,
+          };
+        
+      
+        // console.log(exteriorDetails);
+
+        await db.firestore().collection(collectionName.test_auctionVehicle).doc(insertedId).collection(collectionName.inspection).add({
+          inspectorId:req.body.inspector,
+          vehicleId:insertedId,
+          basicDocuments:basicDocuments,
+          exteriorDetails:exteriorDetails,
+        });
+
+          const carDetails ={
+            id: insertedId,
+            brand: req.body.brand,
+            model: req.body.model,
+            variant: req.body.variant,
+            fuelType: req.body.fuelType,
+            bodyType: req.body.bodyType,
+            color: req.body.color,
+            seat: Number(req.body.seat),
+            ownerType: req.body.ownerType,
+            city: req.body.city,
+            transmission: req.body.transmission,
+            kmsDriven: Number(req.body.kmsDriven),
+            registrationYear: Number(req.body.regYear),
+            imagePath: req.body.thumbImage[0].path,
+          };
+
+          const properties ={
+            brand: req.body.brand,
+            model: req.body.model,
+            variant: req.body.variant,
+            fuelType: req.body.fuelType,
+            bodyType: req.body.bodyType,
+            color: req.body.color,
+            seat: Number(req.body.seat),
+            ownerType: req.body.ownerType,
+            carDescription: req.body.description,
+            city: req.body.city,
+            kmsDriven: Number(req.body.kmsDriven),
+            registrationYear: Number(req.body.regYear),
+            transmission: req.body.transmission,
+            engineCC: Number(req.body.cc),
+            maxPower: req.body.maxPower,
+            mileage: req.body.mileage,
+            maxTorque: req.body.maxTorque,
+            noc: req.body.noc,
+            manufacturingYear: Number(req.body.mfgYear),
+            rtoLocation: req.body.rto,
+            inspectionReport: req.body.inspectionReport,
+            insuranceValidity: insuranceValidity,
+            roadTaxValidity: roadTaxValidity,
+            inspectionScore: Number(req.body.inspectionScore),
+            comfort: req.body.comforts,
+            entertainment: req.body.entertainment,
+            exterior: req.body.exterior,
+            safety: req.body.safety,
+            interior: req.body.interior,
+          };
+
+
+          await db.firestore().collection(collectionName.test_auctionVehicle).doc(insertedId).set({
+            id: insertedId,
+            carPrice: 0,
+            images: req.body.allCarImage,
+            videos:req.body.allCarVideo,
+            status: "INACTIVE",
+            properties: properties,
+            uploadedBy: "admin",
+            uploadedAt: uploadedAt,
+          });
+
+          await db.firestore().collection(collectionName.test_auction).doc(insertedId).set({
+        id: insertedId,
+        carDetails: carDetails,
+        startPrice: 0,
+        isSoldOut: false,
+        latestBid: null,
+        startTime:null,
+        endTime:null,
+        oneClickBuyPrice:null
+          });
+
+      resolve({ success: true, status: status.Ok, msg: 'Data added successfully'});
+
+     
+      
+    } catch (error) {
+      reject(error);
+    }
+});
 
 
 

@@ -38,6 +38,11 @@ exports.login = (req,res) =>
         // Incorrect password
         resolve({ success: false, status: status.Unauthorized, msg: 'Authentication failed'});
       }
+
+      if (adminData.type != 'admin') {
+        // Incorrect password
+        resolve({ success: false, status: status.Unauthorized, msg: 'Authentication failed'});
+      }
   
       // Authentication successful
       req.adminData = adminData;

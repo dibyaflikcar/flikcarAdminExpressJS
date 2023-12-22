@@ -323,6 +323,28 @@ router.post('/uploadAuctionImage',upload.single('file') ,authjwt,async (req, res
       return res.send(response);
     });
 
+    router.post('/uploadAuctionImage7',upload.single('file') ,authjwt,async (req, res, next) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+      }
+      const response = await vehicle.uploadAuctionImage7(req)
+        .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+      return res.send(response);
+    });
+
+    router.post('/uploadAuctionImage8',upload.single('file') ,authjwt,async (req, res, next) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+      }
+      const response = await vehicle.uploadAuctionImage8(req)
+        .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+      return res.send(response);
+    });
+
+    
+
     router.post('/uploadAuctionVideo1',upload.single('file') ,authjwt,async (req, res, next) => {
       // console.log(req.file);
       const errors = validationResult(req);
@@ -642,6 +664,16 @@ router.post('/uploadBlogImage',upload.single('file') ,authjwt,async (req, res, n
     return res.send(response);
   });
 
+// inspection car
+router.post('/addInspectionVehicle',authjwt,async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+    }
+    const response = await vehicle.addInspectionVehicle(req)
+      .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+    return res.send(response);
+  });
 
 
 

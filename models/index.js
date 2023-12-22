@@ -17,4 +17,7 @@ module.exports = {
     bidsHistory:'bids_history',
     rtoLocation:'rtoLocations',
     blog:'blogs',
+    inspection:'inspection',
+    test_auctionVehicle:'test_auctionVehicle',
+    test_auction:'testing_auction',
   };
