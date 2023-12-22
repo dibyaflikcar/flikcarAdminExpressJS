@@ -793,7 +793,7 @@ exports.uploadAuctionImage7 = (req,res) =>
 
             let images = {
               path: fileUrl,
-              type:"OTHERS"
+              type:"OTHER"
             };
             resolve({ success: true, status: status.Ok, msg: 'success', data:images});
         });
@@ -828,7 +828,7 @@ exports.uploadAuctionImage8 = (req,res) =>
 
             let images = {
               path: fileUrl,
-              type:"OTHERS"
+              type:"OTHER"
             };
             resolve({ success: true, status: status.Ok, msg: 'success', data:images});
         });
@@ -1728,7 +1728,6 @@ exports.addInspectionVehicle = (req,res) =>
           };
 
           
-
           const exteriorDetails = {
             bonnet: req.body.bonnet,
             upperCrossMember: req.body.upperCrossMember,
@@ -1784,7 +1783,62 @@ exports.addInspectionVehicle = (req,res) =>
             dentImages: req.body.dentImages,
             tyreImages: req.body.tyreImages,
           };
+
+          const comfortDetails = {
+            manualAC: req.body.manualAC,
+            climateControl: req.body.climateAC,
+            musicSystem: req.body.musicSystem,
+            stereo: req.body.stereo,
+            inbuiltSpeaker: req.body.inbuiltSpeaker,
+            externalSpeaker: req.body.externalSpeaker,
+            steeringMountedAudioControl: req.body.stearingMountedAudio,
+            sunroof: req.body.sunroof,
+            commentsOnComfort: req.body.commentsOnComfort,
+            comfortImages: req.body.comfortImages, //type OTHER
+          };
+
+         const electicalInteriorDetails = {
+            odometerReading: req.body.odometerReading,
+            fuelLevel: req.body.fuelLevel,
+            electricals: req.body.electrical,
+            rearWiper: req.body.rearWiper,
+            rearDefogger: req.body.rearDefogger,
+            powerWindow: req.body.powerWindow,
+            rhsFrontPowerWindow: req.body.rhsFrontPW,
+            lhsFrontPowerWindow: req.body.lhsFrontPW,
+            lhsRearPowerWindow: req.body.lhsRearPW,
+            rhsRearPowerWindow: req.body.rhsRearPW,
+            leatherSeats: req.body.leatherSeats,
+            fabricSeats: req.body.fabricSeats,
+            commentsOnElectrical: req.body.commentsOnElectrical,
+            commentsOnInterior: req.body.commentsOnInterior,
+            interiorImages: req.body.interiorImages, // type: INT
+          };
+      
+          const engineAndTransmissionDetails = {
+            engine: req.body.engine,
+            battery: req.body.battery,
+            coolant: req.body.coolant,
+            engineOilDipstick: req.body.engineOilDipstick,
+            engineOil: req.body.engineOil,
+            engineMount: req.body.engineMount,
+            engineBlow: req.body.engineBlowbyStatus,
+            exhaustSmoke: req.body.exhaustSmoke,
+            radiator: req.body.radiator,
+            engineVideo: req.body.engineVideo,
+            exhaustSmokeVideo: req.body.silencerVideo,
+            engineImages: req.body.engineImages,
+            commentsOnEngine: req.body.commentsOnEngine,
+            clutch: req.body.clutch,
+            gear: req.body.gear,
+            steering: req.body.steering,
+            brake: req.body.brake,
+            suspension: req.body.suspension,
+            commentsOnTransmission: req.body.commentsOnTransmission
+          };
         
+
+         
       
         // console.log(exteriorDetails);
 
@@ -1793,6 +1847,9 @@ exports.addInspectionVehicle = (req,res) =>
           vehicleId:insertedId,
           basicDocuments:basicDocuments,
           exteriorDetails:exteriorDetails,
+          comfortDetails:comfortDetails,
+          electicalInteriorDetails:electicalInteriorDetails,
+          engineAndTransmissionDetails:engineAndTransmissionDetails,
         });
 
           const carDetails ={
