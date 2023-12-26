@@ -1599,6 +1599,68 @@ exports.uploadBlogImage = (req,res) =>
 });
 
 // inspection car
+
+
+exports.getInspectionList = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    try {
+        const snapshot = await db.firestore().collection(collectionName.test_auction).get();
+        const result = snapshot.docs.map(doc => doc.data());
+        resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+exports.deleteInspectionVehicle = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    const id=String(req.body.id);
+    try {
+        // const delete1 = await db.firestore().collection(collectionName.test_auction).doc(id).delete();
+        // const delete2 = await db.firestore().collection(collectionName.test_auctionVehicle).doc(id).delete();
+
+        const querySnapshot = await db.firestore().collection(collectionName.test_auctionVehicle).doc(id).collection(collectionName.inspection).get();
+        querySnapshot.forEach((doc) => {
+          // doc.ref.delete();
+          const inspectionId=String(doc.id);
+          // db.firestore().collection(collectionName.test_auctionVehicle).doc(id).collection(collectionName.inspection).doc(inspectionId).delete();
+          // console.log("okk");
+          // db.firestore().collection(collectionName.test_auctionVehicle).doc(id).collection(collectionName.inspection).delete();
+        });
+        
+        
+        
+        
+        resolve({ success: true, status: status.Ok, msg: 'success'});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+exports.getInspectionListbyID = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    try {
+      const insertedId=String(req.body.id);
+        const snapshot = await db.firestore().collection(collectionName.test_auctionVehicle).doc(insertedId).collection(collectionName.inspection).get();
+         const result = [];
+          snapshot.forEach((doc) => {
+            result.push({
+              id: doc.id,
+              data: doc.data(),
+            });
+          });
+        // const result = snapshot.docs.map(doc => doc.data());
+        resolve({ success: true, status: status.Ok, msg: 'success' ,data : result[0]});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+
+
 exports.addInspectionVehicle = (req,res) =>
   new Promise(async (resolve, reject) => {
  
@@ -1642,9 +1704,9 @@ exports.addInspectionVehicle = (req,res) =>
           }
 
           let fitnessUpto;
-          if(req.body.fitnessUpto!=null)
+          if(req.body.fittnessUpto!=null)
           {
-            fitnessUpto= new Date(req.body.fitnessUpto).getTime();
+            fitnessUpto= new Date(req.body.fittnessUpto).getTime();
           }
           else
           {
@@ -1688,7 +1750,7 @@ exports.addInspectionVehicle = (req,res) =>
             mfgMonth: req.body.mfgMonth,
             manufacturingYear: req.body.mfgYear,
             fuelType: req.body.fuelType,
-            cc: Number(req.body.cc),
+            engineCC: Number(req.body.cc),
             hypoDetails: req.body.hypoDetails,
             hypoImages: req.body.hypoImages,
             seat: req.body.seat,
@@ -1704,6 +1766,7 @@ exports.addInspectionVehicle = (req,res) =>
             duplicateKey: req.body.duplicateKey,
             duplicateKeyImages: req.body.duplicateKeyImages,
             rtoNoc: req.body.rtoNoc,
+            noc: req.body.noc,
             rtoNocImages: req.body.rtoNocImages,
             rtoNocIssueDate: rtoNocIssueDate,
             commentsOnBasic: req.body.commentsOnBasic,
@@ -1836,10 +1899,23 @@ exports.addInspectionVehicle = (req,res) =>
             suspension: req.body.suspension,
             commentsOnTransmission: req.body.commentsOnTransmission
           };
-        
 
-         
+          const safetyDetails = {
+            abs: req.body.abs,
+            noOfAirbags: req.body.noOfAirbags,
+            driverSide: req.body.driverSideAB,
+            coDriverSide: req.body.codriverSideAB,
+            lhsApillar: req.body.lhsAPillarAB,
+            lhsBpillar: req.body.lhsBPillarAB,
+            lhsCpillar: req.body.lhsCPillarAB,
+            rhsApillar: req.body.rhsAPillarAB,
+            rhsBpillar: req.body.rhsBPillarAB,
+            rhsCpillar: req.body.rhsCPillarAB,
+            reverseParkingCamera: req.body.reverseParkingCamera,
+            safetyImages:req.body.safetyImages,
+          };
       
+        
         // console.log(exteriorDetails);
 
         await db.firestore().collection(collectionName.test_auctionVehicle).doc(insertedId).collection(collectionName.inspection).add({
@@ -1850,6 +1926,7 @@ exports.addInspectionVehicle = (req,res) =>
           comfortDetails:comfortDetails,
           electicalInteriorDetails:electicalInteriorDetails,
           engineAndTransmissionDetails:engineAndTransmissionDetails,
+          safetyDetails:safetyDetails,
         });
 
           const carDetails ={
@@ -1932,6 +2009,286 @@ exports.addInspectionVehicle = (req,res) =>
       reject(error);
     }
 });
+
+exports.updateInspectionVehicle = (req,res) =>
+  new Promise(async (resolve, reject) => {
+ 
+    try {
+
+          const randomId= req.body.docId;
+          const insertedId =String(randomId);
+          const inspectionDocId=String(req.body.inspectionDocId);
+
+         
+          let insuranceValidity;
+          if(req.body.insuranceValidity!=null)
+          {
+            insuranceValidity= new Date(req.body.insuranceValidity).getTime();
+          }
+          else
+          {
+            insuranceValidity=null;
+          }
+
+          let roadTaxValidity;
+          if(req.body.roadTaxValidUpto!=null)
+          {
+            roadTaxValidity= new Date(req.body.roadTaxValidUpto).getTime();
+          }
+          else
+          {
+            roadTaxValidity=null;
+          }
+
+        
+
+          let regDate;
+          if(req.body.regDate!=null)
+          {
+            regDate= new Date(req.body.regDate).getTime();
+          }
+          else
+          {
+            regDate=null;
+          }
+
+          let fitnessUpto;
+          if(req.body.fittnessUpto!=null)
+          {
+            fitnessUpto= new Date(req.body.fittnessUpto).getTime();
+          }
+          else
+          {
+            fitnessUpto=null;
+          }
+
+          let rtoNocIssueDate;
+          if(req.body.rtoNocIssueDate!=null)
+          {
+            rtoNocIssueDate= new Date(req.body.rtoNocIssueDate).getTime();
+          }
+          else
+          {
+            rtoNocIssueDate=null;
+          }
+          
+        
+          
+         const basicDocuments = {
+            appointmentId: insertedId,
+            custContactNo: req.body.custContactNo,
+            city: req.body.city,
+            regType: req.body.regType,
+            regNo: req.body.regNo,
+            rcAvailablilty: req.body.rcAvailability,
+            rcAvailabilityImages: req.body.rcAvailabilityImages,
+            rcCondition: req.body.rcCondition,
+            regDate: regDate,
+            fittnessUpto: fitnessUpto,
+            tobeScraped: req.body.tobeScraped,
+            regState: req.body.regState,
+            rtoLocation: req.body.rto,
+            ownerSerialNo: req.body.ownerSerialNo,
+            brand: req.body.brand,
+            model: req.body.model,
+            variant: req.body.variant,
+            engineNo: req.body.engineNo,
+            chassisNo: req.body.chassisNo,
+            chassisImages:req.body.chassisImages,
+            regOwnerName: req.body.regOwnerName,
+            mfgMonth: req.body.mfgMonth,
+            manufacturingYear: req.body.mfgYear,
+            fuelType: req.body.fuelType,
+            engineCC: Number(req.body.cc),
+            hypoDetails: req.body.hypoDetails,
+            hypoImages: req.body.hypoImages,
+            seat: req.body.seat,
+            missmatchRC: req.body.missmatchRC,
+            roadTaxValidity: roadTaxValidity,
+            roadTaxValidityImages: req.body.roadTaxValidityImages,
+            roadTax: req.body.roadTax,
+            insurance: req.body.insurance,
+            insuranceImages: req.body.insuranceImages,
+            insuranceValidity: insuranceValidity,
+            noClaimBonus: req.body.noClaimBonus,
+            missmatchInsurance: req.body.missmatchInsurance,
+            duplicateKey: req.body.duplicateKey,
+            duplicateKeyImages: req.body.duplicateKeyImages,
+            rtoNoc: req.body.rtoNoc,
+            noc: req.body.noc,
+            rtoNocImages: req.body.rtoNocImages,
+            rtoNocIssueDate: rtoNocIssueDate,
+            commentsOnBasic: req.body.commentsOnBasic,
+            registrationYear: req.body.regYear,
+            bodyType: req.body.bodyType,
+            transmission: req.body.transmission,
+            ownerType: req.body.ownerType,
+            color: req.body.color,
+            kmsDriven: req.body.kmsDriven,
+            carDescription: req.body.description,
+            mileage: req.body.mileage,
+            maxPower: req.body.maxPower,
+            maxTorque: req.body.maxTorque,
+            inspectionReport: req.body.inspectionReport,
+            inspectionScore: Number(req.body.inspectionScore),
+            comfort: req.body.comforts,
+            safety: req.body.safety,
+            interior: req.body.interior,
+            exterior: req.body.exterior,
+            entertainment: req.body.entertainment,
+            imagePath: req.body.thumbImage[0].path
+          };
+
+          
+          const exteriorDetails = {
+            bonnet: req.body.bonnet,
+            upperCrossMember: req.body.upperCrossMember,
+            lowerCrossMember: req.body.lowerCrossMember,
+            radiatorSupport: req.body.radiatorSupport,
+            headlightSupport: req.body.headlightSupport,
+            lhsApron: req.body.lhsApron,
+            rhsApron: req.body.rhsApron,
+            frontWindshield: req.body.frontWindshield,
+            firewall: req.body.firewall,
+            cowlTop: req.body.cowlTop,
+            roof: req.body.roof,
+            frontBumper: req.body.frontBumper,
+            lhsHeadLamp: req.body.lhsHeadlamp,
+            rhsHeadLamp: req.body.rhsHeadlamp,
+            lhsFogLamp: req.body.lhsFoglamp,
+            rhsFogLamp: req.body.rhsFoglamp,
+            lhsFender: req.body.lhsFender,
+            lhsFrontAlloy: req.body.lhsFrontAlloy,
+            lhsFrontTyre: req.body.lhsFrontTyre,
+            lhsOrvm: req.body.lhsOrvm,
+            lhsAPillar: req.body.lhsAPillar,
+            lhsFrontDoor: req.body.lhsFrontDoor,
+            lhsBPillar: req.body.lhsBPillar,
+            lhsRearDoor: req.body.lhsRearDoor,
+            lhsCPillar: req.body.lhsCPillar,
+            lhsRunningBoard: req.body.lhsRunningBoard,
+            lhsRearAlloy: req.body.lhsRearAlloy,
+            lhsRearTyre: req.body.lhsRearTyre,
+            lhsQuarterPanel: req.body.lhsQuarterPanel,
+            rearBumper: req.body.rearBumper,
+            lhsTailLamp: req.body.lhsTailLamp,
+            rhsTailLamp: req.body.rhsTailLamp,
+            rearWindshield: req.body.rearWindshield,
+            bootDoor: req.body.bootDoor,
+            spareTyre: req.body.spareTyre,
+            bootFloor: req.body.bootFloor,
+            rhsQuarterPanel: req.body.rhsQuarterPanel,
+            rhsRearAlloy: req.body.rhsRearAlloy,
+            rhsRearTyre: req.body.rhsRearTyre,
+            rhsCPillar: req.body.rhsCPillar,
+            rhsRearDoor: req.body.rhsRearDoor,
+            rhsBPillar: req.body.rhsBPillar,
+            rhsFrontDoor: req.body.rhsFrontDoor,
+            rhsAPillar: req.body.rhsAPillar,
+            rhsRunningBoard: req.body.rhsRunningBoard,
+            rhsFrontAlloy: req.body.rhsFrontAlloy,
+            rhsFrontTyre: req.body.rhsFrontTyre,
+            rhsOrvm: req.body.rhsOrvm,
+            rhsFender: req.body.rhsFender,
+            commentsOnExterior: req.body.commentsOnExterior,
+            exteriorImages: req.body.exteriorImages,
+            dentImages: req.body.dentImages,
+            tyreImages: req.body.tyreImages,
+          };
+
+          const comfortDetails = {
+            manualAC: req.body.manualAC,
+            climateControl: req.body.climateAC,
+            musicSystem: req.body.musicSystem,
+            stereo: req.body.stereo,
+            inbuiltSpeaker: req.body.inbuiltSpeaker,
+            externalSpeaker: req.body.externalSpeaker,
+            steeringMountedAudioControl: req.body.stearingMountedAudio,
+            sunroof: req.body.sunroof,
+            commentsOnComfort: req.body.commentsOnComfort,
+            comfortImages: req.body.comfortImages, //type OTHER
+          };
+
+         const electicalInteriorDetails = {
+            odometerReading: req.body.odometerReading,
+            fuelLevel: req.body.fuelLevel,
+            electricals: req.body.electrical,
+            rearWiper: req.body.rearWiper,
+            rearDefogger: req.body.rearDefogger,
+            powerWindow: req.body.powerWindow,
+            rhsFrontPowerWindow: req.body.rhsFrontPW,
+            lhsFrontPowerWindow: req.body.lhsFrontPW,
+            lhsRearPowerWindow: req.body.lhsRearPW,
+            rhsRearPowerWindow: req.body.rhsRearPW,
+            leatherSeats: req.body.leatherSeats,
+            fabricSeats: req.body.fabricSeats,
+            commentsOnElectrical: req.body.commentsOnElectrical,
+            commentsOnInterior: req.body.commentsOnInterior,
+            interiorImages: req.body.interiorImages, // type: INT
+          };
+      
+          const engineAndTransmissionDetails = {
+            engine: req.body.engine,
+            battery: req.body.battery,
+            coolant: req.body.coolant,
+            engineOilDipstick: req.body.engineOilDipstick,
+            engineOil: req.body.engineOil,
+            engineMount: req.body.engineMount,
+            engineBlow: req.body.engineBlowbyStatus,
+            exhaustSmoke: req.body.exhaustSmoke,
+            radiator: req.body.radiator,
+            engineVideo: req.body.engineVideo,
+            exhaustSmokeVideo: req.body.silencerVideo,
+            engineImages: req.body.engineImages,
+            commentsOnEngine: req.body.commentsOnEngine,
+            clutch: req.body.clutch,
+            gear: req.body.gear,
+            steering: req.body.steering,
+            brake: req.body.brake,
+            suspension: req.body.suspension,
+            commentsOnTransmission: req.body.commentsOnTransmission
+          };
+
+          const safetyDetails = {
+            abs: req.body.abs,
+            noOfAirbags: req.body.noOfAirbags,
+            driverSide: req.body.driverSideAB,
+            coDriverSide: req.body.codriverSideAB,
+            lhsApillar: req.body.lhsAPillarAB,
+            lhsBpillar: req.body.lhsBPillarAB,
+            lhsCpillar: req.body.lhsCPillarAB,
+            rhsApillar: req.body.rhsAPillarAB,
+            rhsBpillar: req.body.rhsBPillarAB,
+            rhsCpillar: req.body.rhsCPillarAB,
+            reverseParkingCamera: req.body.reverseParkingCamera,
+            safetyImages:req.body.safetyImages,
+          };
+      
+        
+        // console.log(exteriorDetails);
+
+        await db.firestore().collection(collectionName.test_auctionVehicle).doc(insertedId).collection(collectionName.inspection).doc(inspectionDocId).update({
+          inspectorId:req.body.inspector,
+          vehicleId:insertedId,
+          basicDocuments:basicDocuments,
+          exteriorDetails:exteriorDetails,
+          comfortDetails:comfortDetails,
+          electicalInteriorDetails:electicalInteriorDetails,
+          engineAndTransmissionDetails:engineAndTransmissionDetails,
+          safetyDetails:safetyDetails,
+        });
+
+        
+
+      resolve({ success: true, status: status.Ok, msg: 'Data added successfully'});
+
+     
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
 
 
 

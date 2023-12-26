@@ -145,6 +145,10 @@ router.get('/auction',authjwt, async (req, res, next) => {
 });
 
 
+
+
+
+
 router.get('/getAuctionVehicle',authjwt, async (req, res, next) => {
   // return res.send("hello ok");
   const errors = validationResult(req);
@@ -674,8 +678,48 @@ router.post('/addInspectionVehicle',authjwt,async (req, res, next) => {
       .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
     return res.send(response);
   });
+  router.post('/updateInspectionVehicle',authjwt,async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+    }
+    const response = await vehicle.updateInspectionVehicle(req)
+      .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+    return res.send(response);
+  });
 
-
+  router.get('/getInspectionList',authjwt, async (req, res, next) => {
+    // return res.send("hello ok");
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+    }
+    const response = await vehicle.getInspectionList(req)
+      .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+    return res.send(response);
+  });
+  
+  router.post('/deleteInspectionVehicle',authjwt, async (req, res, next) => {
+    // return res.send("hello ok");
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+    }
+    const response = await vehicle.deleteInspectionVehicle(req)
+      .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+    return res.send(response);
+  });
+  
+  router.post('/getInspectionListbyID',authjwt, async (req, res, next) => {
+    // return res.send("hello ok");
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+    }
+    const response = await vehicle.getInspectionListbyID(req)
+      .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+    return res.send(response);
+  });
 
 
 
