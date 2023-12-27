@@ -264,6 +264,21 @@ router.post('/addAuctionVehicle' ,authjwt,async (req, res, next) => {
             return res.send(response);
           });
 
+          
+
+          router.post('/uploadInspectionPdf',upload.single('file') ,authjwt,async (req, res, next) => {
+
+            // const ThumbnailPhotos = req.file;
+            // console.log(ThumbnailPhotos);
+              const errors = validationResult(req);
+              if (!errors.isEmpty()) {
+                return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+              }
+              const response = await vehicle.uploadInspectionPdf(req)
+                .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+              return res.send(response);
+            });
+
 router.post('/uploadAuctionImage',upload.single('file') ,authjwt,async (req, res, next) => {
 
   // const ThumbnailPhotos = req.file;
@@ -721,7 +736,62 @@ router.post('/addInspectionVehicle',authjwt,async (req, res, next) => {
     return res.send(response);
   });
 
+  router.post('/getInspectionReport',authjwt, async (req, res, next) => {
+    // return res.send("hello ok");
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+    }
+    const response = await vehicle.getInspectionReport(req)
+      .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+    return res.send(response);
+  });
 
+  // Inspector Part
+  router.post('/addInspector',authjwt, async (req, res, next) => {
+    // return res.send("hello ok");
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+    }
+    const response = await vehicle.addInspector(req)
+      .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+    return res.send(response);
+  });
+  router.post('/getInspectorbyId',authjwt, async (req, res, next) => {
+    // return res.send("hello ok");
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+    }
+    const response = await vehicle.getInspectorbyId(req)
+      .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+    return res.send(response);
+  });
+
+  router.post('/updateInspector',authjwt, async (req, res, next) => {
+    // return res.send("hello ok");
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+    }
+    const response = await vehicle.updateInspector(req)
+      .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+    return res.send(response);
+  });
+
+  router.post('/deleteInspector',authjwt, async (req, res, next) => {
+    // return res.send("hello ok");
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+    }
+    const response = await vehicle.deleteInspector(req)
+      .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+    return res.send(response);
+  });
+  
+  
 
 
 

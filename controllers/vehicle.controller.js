@@ -530,6 +530,37 @@ exports.uploadInspectionImage = (req,res) =>
     }
 });
 
+
+
+exports.uploadInspectionPdf = (req,res) =>
+  new Promise(async (resolve, reject) => {
+
+    try {
+
+          const randomId= new Date().getTime();
+          const image = req.file;
+          // console.log(image);
+
+        // Upload image to Firebase Cloud Storage
+        const storageRef = bucket.file(randomId+"_"+image.originalname);
+        const blobStream = storageRef.createWriteStream();
+        blobStream.on('finish', async () => {
+          // Generate download URL
+          const downloadUrl = await storageRef.getSignedUrl({
+            action: 'read',
+            expires: '01-01-2100', // Adjust the expiration date as needed
+          });
+          const fileUrl=downloadUrl[0];
+            resolve({ success: true, status: status.Ok, msg: 'success', data:fileUrl});
+        });
+
+        blobStream.end(image.buffer);
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
 exports.uploadAuctionImage = (req,res) =>
   new Promise(async (resolve, reject) => {
 
@@ -1604,7 +1635,7 @@ exports.uploadBlogImage = (req,res) =>
 exports.getInspectionList = (req,res) =>
   new Promise(async (resolve, reject) => {
     try {
-        const snapshot = await db.firestore().collection(collectionName.test_auction).get();
+        const snapshot = await db.firestore().collection(collectionName.auction).get();
         const result = snapshot.docs.map(doc => doc.data());
         resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
       
@@ -1617,21 +1648,26 @@ exports.deleteInspectionVehicle = (req,res) =>
   new Promise(async (resolve, reject) => {
     const id=String(req.body.id);
     try {
-        // const delete1 = await db.firestore().collection(collectionName.test_auction).doc(id).delete();
-        // const delete2 = await db.firestore().collection(collectionName.test_auctionVehicle).doc(id).delete();
+        
 
-        const querySnapshot = await db.firestore().collection(collectionName.test_auctionVehicle).doc(id).collection(collectionName.inspection).get();
-        querySnapshot.forEach((doc) => {
-          // doc.ref.delete();
-          const inspectionId=String(doc.id);
-          // db.firestore().collection(collectionName.test_auctionVehicle).doc(id).collection(collectionName.inspection).doc(inspectionId).delete();
-          // console.log("okk");
-          // db.firestore().collection(collectionName.test_auctionVehicle).doc(id).collection(collectionName.inspection).delete();
-        });
+        const querySnapshot = await db.firestore().collection(collectionName.AuctionVehicle).doc(id).collection(collectionName.inspection).get();
+
+        const subcollectionExists = !querySnapshot.empty;
+        if(subcollectionExists==true)
+        {
+          const result = [];
+          querySnapshot.forEach((doc) => {
+            result.push({
+              id: doc.id,
+              data: doc.data(),
+            });
+          });
+          const inspectionId=String(result[0].id);
+          const delete3=await db.firestore().collection(collectionName.AuctionVehicle).doc(id).collection(collectionName.inspection).doc(inspectionId).delete();
+        }
         
-        
-        
-        
+        const delete1 = await db.firestore().collection(collectionName.auction).doc(id).delete();
+        const delete2 = await db.firestore().collection(collectionName.AuctionVehicle).doc(id).delete();
         resolve({ success: true, status: status.Ok, msg: 'success'});
       
     } catch (error) {
@@ -1643,7 +1679,7 @@ exports.getInspectionListbyID = (req,res) =>
   new Promise(async (resolve, reject) => {
     try {
       const insertedId=String(req.body.id);
-        const snapshot = await db.firestore().collection(collectionName.test_auctionVehicle).doc(insertedId).collection(collectionName.inspection).get();
+        const snapshot = await db.firestore().collection(collectionName.AuctionVehicle).doc(insertedId).collection(collectionName.inspection).get();
          const result = [];
           snapshot.forEach((doc) => {
             result.push({
@@ -1659,6 +1695,22 @@ exports.getInspectionListbyID = (req,res) =>
     }
 });
 
+exports.getInspectionReport = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    try {
+      const insertedId=String(req.body.id);
+        const snapshot = await db.firestore().collection(collectionName.AuctionVehicle).doc(insertedId).collection(collectionName.inspection).get();
+         
+        const result = snapshot.docs.map(doc => doc.data());
+        resolve({ success: true, status: status.Ok, msg: 'success' ,data : result[0]});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+
+
 
 
 exports.addInspectionVehicle = (req,res) =>
@@ -1669,6 +1721,7 @@ exports.addInspectionVehicle = (req,res) =>
           const randomId= new Date().getTime();
           const insertedId =String(randomId);
           const uploadedAt =randomId;
+          const createdAt =randomId;
 
          
           let insuranceValidity;
@@ -1918,15 +1971,17 @@ exports.addInspectionVehicle = (req,res) =>
         
         // console.log(exteriorDetails);
 
-        await db.firestore().collection(collectionName.test_auctionVehicle).doc(insertedId).collection(collectionName.inspection).add({
+        await db.firestore().collection(collectionName.AuctionVehicle).doc(insertedId).collection(collectionName.inspection).add({
           inspectorId:req.body.inspector,
           vehicleId:insertedId,
+          pdfUrl: null,
           basicDocuments:basicDocuments,
           exteriorDetails:exteriorDetails,
           comfortDetails:comfortDetails,
           electicalInteriorDetails:electicalInteriorDetails,
           engineAndTransmissionDetails:engineAndTransmissionDetails,
           safetyDetails:safetyDetails,
+          createdAt:createdAt
         });
 
           const carDetails ={
@@ -1979,7 +2034,7 @@ exports.addInspectionVehicle = (req,res) =>
           };
 
 
-          await db.firestore().collection(collectionName.test_auctionVehicle).doc(insertedId).set({
+          await db.firestore().collection(collectionName.AuctionVehicle).doc(insertedId).set({
             id: insertedId,
             carPrice: 0,
             images: req.body.allCarImage,
@@ -1988,16 +2043,17 @@ exports.addInspectionVehicle = (req,res) =>
             properties: properties,
             uploadedBy: "admin",
             uploadedAt: uploadedAt,
+            pdfUrl: null,
           });
 
-          await db.firestore().collection(collectionName.test_auction).doc(insertedId).set({
+          await db.firestore().collection(collectionName.auction).doc(insertedId).set({
         id: insertedId,
         carDetails: carDetails,
         startPrice: 0,
         isSoldOut: false,
         latestBid: null,
-        startTime:null,
-        endTime:null,
+        startTime:1703655000000,
+        endTime:1703655000000,
         oneClickBuyPrice:null
           });
 
@@ -2267,15 +2323,20 @@ exports.updateInspectionVehicle = (req,res) =>
         
         // console.log(exteriorDetails);
 
-        await db.firestore().collection(collectionName.test_auctionVehicle).doc(insertedId).collection(collectionName.inspection).doc(inspectionDocId).update({
+        await db.firestore().collection(collectionName.AuctionVehicle).doc(insertedId).collection(collectionName.inspection).doc(inspectionDocId).update({
           inspectorId:req.body.inspector,
           vehicleId:insertedId,
+          pdfUrl:req.body.inspectionPdf,
           basicDocuments:basicDocuments,
           exteriorDetails:exteriorDetails,
           comfortDetails:comfortDetails,
           electicalInteriorDetails:electicalInteriorDetails,
           engineAndTransmissionDetails:engineAndTransmissionDetails,
           safetyDetails:safetyDetails,
+        });
+
+        await db.firestore().collection(collectionName.AuctionVehicle).doc(insertedId).update({
+          pdfUrl:req.body.inspectionPdf,
         });
 
         
@@ -2290,8 +2351,84 @@ exports.updateInspectionVehicle = (req,res) =>
 });
 
 
+// Inspector part
+exports.addInspector = (req,res) =>
+  new Promise(async (resolve, reject) => {
+ 
+    try {
+
+          const randomId= new Date().getTime();
+          const insertedId =String(randomId);
+          const createdAt =randomId;
+
+         
+          await db.firestore().collection(collectionName.admin).doc(insertedId).set({
+            id: insertedId,
+            name: req.body.name,
+            email: req.body.email,
+            phone: req.body.phone,
+            password: req.body.password,
+            status: req.body.status,
+            type: 'inspector',
+            createdAt:createdAt
+          });
+
+          
+      resolve({ success: true, status: status.Ok, msg: 'Data added successfully'});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+exports.getInspectorbyId = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    try {
+      const insertedId=String(req.body.id);
+        const snapshot = await db.firestore().collection(collectionName.admin).doc(insertedId).get();
+        const result = snapshot.data();
+        // console.log(result);
+        resolve({ success: true, status: status.Ok, msg: 'success' ,data : result});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+exports.updateInspector = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    try {
+        const insertedId=String(req.body.docId);
+
+      await db.firestore().collection(collectionName.admin).doc(insertedId).update({
+        name: req.body.name,
+        email: req.body.email,
+        phone: req.body.phone,
+        password: req.body.password,
+        status: req.body.status,
+      });
+
+      
+  resolve({ success: true, status: status.Ok, msg: 'Data added successfully'});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
 
 
+
+exports.deleteInspector = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    const id=String(req.body.id);
+    try {
+        const delete1 = await db.firestore().collection(collectionName.admin).doc(id).delete();
+        resolve({ success: true, status: status.Ok, msg: 'success'});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
 
 
 
