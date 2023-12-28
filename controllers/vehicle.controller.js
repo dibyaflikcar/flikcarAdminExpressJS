@@ -1803,7 +1803,7 @@ exports.addInspectionVehicle = (req,res) =>
             mfgMonth: req.body.mfgMonth,
             manufacturingYear: req.body.mfgYear,
             fuelType: req.body.fuelType,
-            engineCC: Number(req.body.cc),
+            engineCC: req.body.cc,
             hypoDetails: req.body.hypoDetails,
             hypoImages: req.body.hypoImages,
             seat: req.body.seat,
@@ -1992,12 +1992,12 @@ exports.addInspectionVehicle = (req,res) =>
             fuelType: req.body.fuelType,
             bodyType: req.body.bodyType,
             color: req.body.color,
-            seat: Number(req.body.seat),
+            seat: req.body.seat,
             ownerType: req.body.ownerType,
             city: req.body.city,
             transmission: req.body.transmission,
-            kmsDriven: Number(req.body.kmsDriven),
-            registrationYear: Number(req.body.regYear),
+            kmsDriven: req.body.kmsDriven,
+            registrationYear: req.body.regYear,
             imagePath: req.body.thumbImage[0].path,
           };
 
@@ -2008,19 +2008,19 @@ exports.addInspectionVehicle = (req,res) =>
             fuelType: req.body.fuelType,
             bodyType: req.body.bodyType,
             color: req.body.color,
-            seat: Number(req.body.seat),
+            seat: req.body.seat,
             ownerType: req.body.ownerType,
             carDescription: req.body.description,
             city: req.body.city,
-            kmsDriven: Number(req.body.kmsDriven),
-            registrationYear: Number(req.body.regYear),
+            kmsDriven: req.body.kmsDriven,
+            registrationYear: req.body.regYear,
             transmission: req.body.transmission,
-            engineCC: Number(req.body.cc),
+            engineCC: req.body.cc,
             maxPower: req.body.maxPower,
             mileage: req.body.mileage,
             maxTorque: req.body.maxTorque,
             noc: req.body.noc,
-            manufacturingYear: Number(req.body.mfgYear),
+            manufacturingYear: req.body.mfgYear,
             rtoLocation: req.body.rto,
             inspectionReport: req.body.inspectionReport,
             insuranceValidity: insuranceValidity,
@@ -2075,6 +2075,8 @@ exports.updateInspectionVehicle = (req,res) =>
           const insertedId =String(randomId);
           const inspectionDocId=String(req.body.inspectionDocId);
 
+          const auctionStartTime=new Date(req.body.auctionStartTime).getTime();
+          const auctionEndTime=new Date(req.body.auctionEndTime).getTime();
          
           let insuranceValidity;
           if(req.body.insuranceValidity!=null)
@@ -2155,7 +2157,7 @@ exports.updateInspectionVehicle = (req,res) =>
             mfgMonth: req.body.mfgMonth,
             manufacturingYear: req.body.mfgYear,
             fuelType: req.body.fuelType,
-            engineCC: Number(req.body.cc),
+            engineCC: req.body.cc,
             hypoDetails: req.body.hypoDetails,
             hypoImages: req.body.hypoImages,
             seat: req.body.seat,
@@ -2335,11 +2337,77 @@ exports.updateInspectionVehicle = (req,res) =>
           safetyDetails:safetyDetails,
         });
 
-        await db.firestore().collection(collectionName.AuctionVehicle).doc(insertedId).update({
-          pdfUrl:req.body.inspectionPdf,
-        });
+        const carDetails ={
+          id: insertedId,
+          brand: req.body.brand,
+          model: req.body.model,
+          variant: req.body.variant,
+          fuelType: req.body.fuelType,
+          bodyType: req.body.bodyType,
+          color: req.body.color,
+          seat: req.body.seat,
+          ownerType: req.body.ownerType,
+          city: req.body.city,
+          transmission: req.body.transmission,
+          kmsDriven: req.body.kmsDriven,
+          registrationYear: req.body.regYear,
+          imagePath: req.body.thumbImage[0].path,
+        };
+
+       
+
+        const properties ={
+          brand: req.body.brand,
+          model: req.body.model,
+          variant: req.body.variant,
+          fuelType: req.body.fuelType,
+          bodyType: req.body.bodyType,
+          color: req.body.color,
+          seat: req.body.seat,
+          ownerType: req.body.ownerType,
+          carDescription: req.body.description,
+          city: req.body.city,
+          kmsDriven: req.body.kmsDriven,
+          registrationYear: req.body.regYear,
+          transmission: req.body.transmission,
+          engineCC: req.body.cc,
+          maxPower: req.body.maxPower,
+          mileage: req.body.mileage,
+          maxTorque: req.body.maxTorque,
+          noc: req.body.noc,
+          manufacturingYear: req.body.mfgYear,
+          rtoLocation: req.body.rto,
+          inspectionReport: req.body.inspectionReport,
+          insuranceValidity: insuranceValidity,
+          roadTaxValidity: roadTaxValidity,
+          inspectionScore: Number(req.body.inspectionScore),
+          comfort: req.body.comforts,
+          entertainment: req.body.entertainment,
+          exterior: req.body.exterior,
+          safety: req.body.safety,
+          interior: req.body.interior,
+        };
 
         
+
+
+        await db.firestore().collection(collectionName.AuctionVehicle).doc(insertedId).update({
+          carPrice: req.body.carPrice,
+          images: req.body.allCarImage,
+          videos:req.body.allCarVideo,
+          properties: properties,
+          pdfUrl: req.body.inspectionPdf,
+        });
+
+        await db.firestore().collection(collectionName.auction).doc(insertedId).update({
+        carDetails: carDetails,
+        isSoldOut: req.body.carsoldStatus,
+        startTime:auctionStartTime,
+        endTime:auctionEndTime,
+        oneClickBuyPrice:req.body.oneClickBuyPrice
+        });
+
+    
 
       resolve({ success: true, status: status.Ok, msg: 'Data added successfully'});
 
@@ -2415,8 +2483,6 @@ exports.updateInspector = (req,res) =>
       reject(error);
     }
 });
-
-
 
 exports.deleteInspector = (req,res) =>
   new Promise(async (resolve, reject) => {
