@@ -18,6 +18,7 @@ module.exports = {
     rtoLocation:'rtoLocations',
     blog:'blogs',
     inspection:'inspection',
+    disclaimer:'disclaimers',
     test_auctionVehicle:'test_auctionVehicle',
     test_auction:'testing_auction',
   };

@@ -792,8 +792,17 @@ router.post('/addInspectionVehicle',authjwt,async (req, res, next) => {
   });
   
   
-
-
+  router.get('/getDisclaimers',authjwt, async (req, res, next) => {
+    // return res.send("hello ok");
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.send({ errors: errors.array(), success: false, status: status.BadRequest });
+    }
+    const response = await vehicle.getDisclaimers(req)
+      .catch((e) => res.send({ success: false, errors: [{ msg: e.message }], status: status.InternalServerError }));
+    return res.send(response);
+  });
+  
 
 
 

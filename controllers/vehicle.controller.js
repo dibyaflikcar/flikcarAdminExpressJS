@@ -2497,6 +2497,20 @@ exports.deleteInspector = (req,res) =>
 });
 
 
+exports.getDisclaimers = (req,res) =>
+  new Promise(async (resolve, reject) => {
+    try {
+        const snapshot = await db.firestore().collection(collectionName.disclaimer).get();
+        const result = snapshot.docs.map(doc => doc.data());
+        // console.log(result[0]);
+        resolve({ success: true, status: status.Ok, msg: 'success' ,data : result[0]});
+      
+    } catch (error) {
+      reject(error);
+    }
+});
+
+
 
 
 
